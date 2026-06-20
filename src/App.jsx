@@ -33,6 +33,7 @@ const ICON_PATHS = {
   box:         <path d="M3 8l9-5 9 5-9 5-9-5zM3 8v9l9 5 9-5V8M12 13v9" />,
   book:        <path d="M4 4.5A2.5 2.5 0 016.5 2H11a3 3 0 013 3v15.5a2.5 2.5 0 00-2.5-2.5H4zM20 4.5A2.5 2.5 0 0017.5 2H13a3 3 0 00-3 3v15.5A2.5 2.5 0 0112.5 18H20z" />,
   warning:     <path d="M12 3 2 20h20zM12 9.5v4.5M12 17h.01" />,
+  check:       <path d="M4 12.5 9 18 20 6" />,
 };
 
 function Icon({ name, color = C.text, size = 18, strokeWidth = 1.8 }) {
@@ -504,13 +505,15 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
 
           {/* Status bar */}
           <div style={{
+            display: "flex", alignItems: "center", gap: 8,
             padding: "8px 12px", borderRadius: 8, marginBottom: 14,
             background: dirBg, border: `1px solid ${dirColor}30`,
             fontSize: 12, color: dirColor, fontWeight: 500,
           }}>
+            {!isRisk && <Icon name="check" color={dirColor} size={14} />}
             {isRisk
               ? `This miRNA is in the pathological range and is actively contributing to MetSyn risk.`
-              : `✓ This miRNA is within normal range and is not currently a risk driver.`}
+              : `This miRNA is within normal range and is not currently a risk driver.`}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -784,7 +787,7 @@ function ModelResultPanel({result, modelKey, active, onSelect, atp3, atp3Met}){
       <div style={{padding:"12px 16px",display:"flex",alignItems:"center",gap:10,
                    borderBottom:`1px solid ${isActive?`${color}30`:C.border}`,
                    background:`linear-gradient(90deg,${color}18 0%,transparent 100%)`}}>
-        <span style={{fontSize:18}}>{m.icon}</span>
+        <Icon name={m.icon} color={color} size={18} />
         <div style={{flex:1}}>
           <div style={{fontWeight:600,fontSize:13,color:C.text}}>{m.label}</div>
           <div style={{fontSize:11,color:C.muted}}>{m.desc}</div>
@@ -980,9 +983,9 @@ export default function App() {
         </div>
         <div style={{display:"flex",gap:6}}>
           {Object.values(MODELS).map(m=>(
-            <div key={m.key} style={{fontSize:11,color:m.color,background:`${m.color}15`,
+            <div key={m.key} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:m.color,background:`${m.color}15`,
                                      border:`1px solid ${m.color}40`,borderRadius:20,
-                                     padding:"3px 10px"}}>{m.icon} {m.label}</div>
+                                     padding:"3px 10px"}}><Icon name={m.icon} color={m.color} size={12} /> {m.label}</div>
           ))}
         </div>
       </div>
@@ -1130,7 +1133,7 @@ export default function App() {
                         <tr key={key} style={{borderBottom:`1px solid ${C.border}20`,
                                               background:active===key?`${m.color}08`:"transparent"}}>
                           <td style={{padding:"8px 12px"}}>
-                            <span style={{color:m.color,fontWeight:600}}>{m.icon} {m.label}</span>
+                            <span style={{display:"inline-flex",alignItems:"center",gap:6,color:m.color,fontWeight:600}}><Icon name={m.icon} color={m.color} size={14} /> {m.label}</span>
                           </td>
                           <td style={{padding:"8px 12px",color:RISK_COLOR[r.risk_level],fontWeight:500}}>{r.label}</td>
                           <td style={{padding:"8px 12px",fontFamily:"monospace",fontWeight:700,color:RISK_COLOR[r.risk_level]}}>{Math.round(r.probability*100)}%</td>
