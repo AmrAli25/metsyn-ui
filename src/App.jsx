@@ -16,22 +16,51 @@ const C = {
 const RISK_COLOR = { Low:C.green, Moderate:C.amber, High:C.red };
 const RISK_BG    = { Low:C.greenSoft, Moderate:C.amberSoft, High:C.redSoft };
 
+// ── Icon set ──────────────────────────────────────────────────────────────────
+// Monochrome line icons (matches the header logo style) — used instead of
+// colorful emoji throughout the app.
+const ICON_PATHS = {
+  flask:       <path d="M9 2h6M9 2v6.5L4 18a2 2 0 002 3h12a2 2 0 002-3l-5-9.5V2" />,
+  helix:       <path d="M7 3c5 3 5 6 0 9s-5 6 0 9M17 3c-5 3-5 6 0 9s5 6 0 9M5 9.5h14M5 14.5h14" />,
+  bolt:        <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />,
+  pill:        <><path d="M5 12 12 5a4.95 4.95 0 117 7l-7 7a4.95 4.95 0 01-7-7z" /><path d="M9.5 7.5l7 7" /></>,
+  heart:       <path d="M12 21s-7.5-4.7-10-9.5C.5 7.8 3 4 7 4c2 0 4 1.3 5 3 1-1.7 3-3 5-3 4 0 6.5 3.8 5 7.5C19.5 16.3 12 21 12 21z" />,
+  drop:        <path d="M12 2C8 8 5 11.5 5 15.2 5 19 8.1 22 12 22s7-3 7-6.8C19 11.5 16 8 12 2z" />,
+  liver:       <path d="M4 9c0-3.3 3.6-6 9-6 5 0 7 2.5 7 6 0 4-3 8-9 9-3.5.6-7-1.7-7-5 0-1.5.6-2.8 0-4z" />,
+  flame:       <path d="M12 2c2.5 4-1 5.3-1 8.3a3 3 0 106 0c0-1.6-.8-2.4-1.5-3.3 1 2.6-.6 3.6-1.5 3.6-1.4 0-1.5-1.5-1.5-3 0-1.7 1-2.6-.5-5.6z" />,
+  stethoscope: <path d="M6 3v6a4 4 0 008 0V3M10 13v2a5 5 0 0010 0v-1.5M19.5 11.5a2 2 0 100-4 2 2 0 000 4z" />,
+  scale:       <path d="M12 3v4M5 8h14M5 8l-2.5 6a3 3 0 006 0L5 8M19 8l-2.5 6a3 3 0 006 0L19 8M9 21h6" />,
+  box:         <path d="M3 8l9-5 9 5-9 5-9-5zM3 8v9l9 5 9-5V8M12 13v9" />,
+  book:        <path d="M4 4.5A2.5 2.5 0 016.5 2H11a3 3 0 013 3v15.5a2.5 2.5 0 00-2.5-2.5H4zM20 4.5A2.5 2.5 0 0017.5 2H13a3 3 0 00-3 3v15.5A2.5 2.5 0 0112.5 18H20z" />,
+  warning:     <path d="M12 3 2 20h20zM12 9.5v4.5M12 17h.01" />,
+  check:       <path d="M4 12.5 9 18 20 6" />,
+};
+
+function Icon({ name, color = C.text, size = 18, strokeWidth = 1.8 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color}
+         strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {ICON_PATHS[name]}
+    </svg>
+  );
+}
+
 const MODELS = {
   clinical: {
     key:"clinical", label:"Clinical",
-    icon:"🔬", color:C.accent, soft:C.accentSoft,
+    icon:"flask", color:C.accent, soft:C.accentSoft,
     desc:"14 clinical biomarkers only — no miRNA required",
     mirnaPct:0,
   },
   mirna: {
     key:"mirna", label:"miRNA-Aware",
-    icon:"🧬", color:C.purple, soft:C.purpleSoft,
+    icon:"helix", color:C.purple, soft:C.purpleSoft,
     desc:"Research-calibrated miRNA distributions (PMC8492848, PMC11942408)",
     mirnaPct:15,
   },
   ensemble: {
     key:"ensemble", label:"Combined",
-    icon:"⚡", color:C.teal, soft:C.tealSoft,
+    icon:"bolt", color:C.teal, soft:C.tealSoft,
     desc:"35% Clinical RF + 65% miRNA XGBoost — recommended",
     mirnaPct:10,
   },
@@ -62,7 +91,7 @@ const THERAPEUTIC_MAP = {
     name: "miR-122",
     pathway: "Lipid metabolism & Fatty liver",
     phenotype: "Hepatic Dyslipidemia Phenotype",
-    icon: "🫀",
+    icon: "liver",
     riskDirection: "up",
     threshold: 1.5,
     conventional: {
@@ -84,13 +113,13 @@ const THERAPEUTIC_MAP = {
     name: "miR-33",
     pathway: "Cholesterol regulation & HDL levels",
     phenotype: "Low HDL & Atherosclerosis Risk",
-    icon: "🩸",
+    icon: "drop",
     riskDirection: "down",
     threshold: 0.9,
     conventional: {
       drugs: ["Fenofibrate (Lipanthyl)", "Gemfibrozil"],
       mechanism: "Fibrates activate PPARα, increasing fatty acid oxidation and raising HDL-C while reducing triglycerides.",
-      note: "⚠ miR-33 is DOWNREGULATED in MetSyn — low values indicate risk."
+      note: "miR-33 is DOWNREGULATED in MetSyn — low values indicate risk."
     },
     targeted: {
       therapy: "Anti-miR-33 Oligonucleotides",
@@ -106,7 +135,7 @@ const THERAPEUTIC_MAP = {
     name: "miR-21",
     pathway: "Chronic low-grade inflammation",
     phenotype: "Inflammation & Tissue Fibrosis",
-    icon: "🔥",
+    icon: "flame",
     riskDirection: "up",
     threshold: 1.5,
     conventional: {
@@ -128,7 +157,7 @@ const THERAPEUTIC_MAP = {
     name: "miR-103",
     pathway: "Insulin resistance & Glucose regulation",
     phenotype: "Severe Insulin Resistance Phenotype",
-    icon: "🩺",
+    icon: "stethoscope",
     riskDirection: "up",
     threshold: 1.4,
     conventional: {
@@ -140,7 +169,7 @@ const THERAPEUTIC_MAP = {
       therapy: "Antagomir-103 (Anti-miR-103)",
       stage: "Preclinical",
       mechanism: "Restores Caveolin-1 expression in skeletal muscle, reactivating insulin receptor signalling and glucose uptake.",
-      delivery: "⚠ Major challenge: non-fenestrated muscle capillaries block standard LNPs. Requires advanced extra-hepatic nano-carriers.",
+      delivery: "Major challenge: non-fenestrated muscle capillaries block standard LNPs. Requires advanced extra-hepatic nano-carriers.",
       ref: "Trajkovski et al., 2011"
     },
     target_tissue: "Skeletal Muscle & Adipose tissue",
@@ -150,7 +179,7 @@ const THERAPEUTIC_MAP = {
     name: "miR-34a",
     pathway: "Obesity-induced metabolic stress",
     phenotype: "Severe Obesity & Adipose Tissue Senescence",
-    icon: "⚖️",
+    icon: "scale",
     riskDirection: "up",
     threshold: 1.5,
     conventional: {
@@ -171,79 +200,61 @@ const THERAPEUTIC_MAP = {
 };
 
 
-// ── Extra miRNA markers (informational only — NOT sent to the ML model) ──────
-// The trained model_mirna.pkl is fixed to the 5 miRNA features above; these
-// are additional markers used only to drive the Risk Indicator cards below.
-// Thresholds here are approximate round-number cutoffs, not sourced from a
-// specific paper like the 5 ML miRNAs — replace with real values if available.
-const EXTRA_MIRNA_FIELDS = [
-  {key:"miR_375",label:"miR-375",sub:"Beta-cell stress (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_143",label:"miR-143",sub:"Insulin sensitivity (informational, ↓ = risk)",min:0.1,max:6,step:0.01,hi:0.5,lo:1.1,riskDirection:"down",threshold:0.7},
-  {key:"miR_126",label:"miR-126",sub:"Endothelial function (informational, ↓ = risk)",min:0.1,max:6,step:0.01,hi:0.5,lo:1.1,riskDirection:"down",threshold:0.7},
-  {key:"miR_1",  label:"miR-1",  sub:"Cardiac stress (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_133",label:"miR-133",sub:"Cardiac muscle stress (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_155",label:"miR-155",sub:"Adipose inflammation (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_221",label:"miR-221",sub:"Leptin resistance (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-];
 
 // ── Risk indicator cards ──────────────────────────────────────────────────────
-// `rules` are evaluated directly against numeric values (no string eval).
-// A card is shown if ANY of its rules is true (matches the "or" in the briefs).
-const RISK_CARDS = [
-  {
-    id: "risk_diabetes", icon: "🍬",
-    riskTitle: "Type 2 Diabetes Risk",
-    subTitle: "Impaired glucose regulation and insulin secretion",
-    associatedMiRNA: ["miR-375 (Elevated)", "miR-143 (Decreased)"],
-    description: "Changes in your miRNA levels indicate a decrease in body cell sensitivity to insulin. This increases the potential risk of developing Type 2 Diabetes in the future if healthy lifestyle interventions are not implemented.",
-    rules: [
-      {key:"miR_375", riskDirection:"up",   threshold:1.5},
-      {key:"miR_143", riskDirection:"down", threshold:0.7},
-    ],
-  },
-  {
-    id: "risk_cardiovascular", icon: "❤️",
-    riskTitle: "Cardiovascular Risks",
-    subTitle: "Arterial stress and endothelial dysfunction",
-    associatedMiRNA: ["miR-126 (Decreased)", "miR-1 (Elevated)", "miR-133 (Elevated)"],
-    description: "Your biomolecular profile shows early indicators of increased vascular inflammation and reduced arterial elasticity. This can elevate the long-term risk of atherosclerosis (clogged arteries) or myocardial stress.",
-    rules: [
-      {key:"miR_126", riskDirection:"down", threshold:0.7},
-      {key:"miR_1",   riskDirection:"up",   threshold:1.5},
-      {key:"miR_133", riskDirection:"up",   threshold:1.5},
-    ],
-  },
-  {
-    id: "risk_fatty_liver", icon: "🫀",
-    riskTitle: "Non-Alcoholic Fatty Liver Disease (NAFLD) Risk",
-    subTitle: "Disruption of hepatic lipid metabolism",
-    associatedMiRNA: ["miR-122 (Elevated)", "miR-34a (Elevated)"],
-    description: "Genetic signals point toward the initiation of excess lipid accumulation around liver cells. Without early management, this disruption could lead to chronic liver inflammation and impaired hepatic functions.",
-    rules: [
-      {key:"miR_122", riskDirection:"up", threshold:1.5},
-      {key:"miR_34a", riskDirection:"up", threshold:1.5},
-    ],
-  },
-  {
-    id: "risk_inflammation", icon: "🔥",
-    riskTitle: "Chronic Inflammation & Metabolic Suppression",
-    subTitle: "Adipose tissue inflammation and leptin resistance",
-    associatedMiRNA: ["miR-155 (Elevated)", "miR-221 (Elevated)"],
-    description: "Imbalances in these specific genetic markers trigger a state of low-grade, hidden inflammation within adipose (fat) tissues. This underlying inflammation suppresses healthy metabolic rate and increases fat-retention signals.",
-    rules: [
-      {key:"miR_155", riskDirection:"up", threshold:1.5},
-      {key:"miR_221", riskDirection:"up", threshold:1.5},
-    ],
-  },
+// Each card pairs one clinical biomarker with its matching ML miRNA, combined
+// with the SAME 35% clinical / 65% miRNA weighting already used by the
+// Ensemble model (see MODELS.ensemble) — not a plain OR/AND boolean.
+// miRNA threshold/direction is read from THERAPEUTIC_MAP (single source of truth).
+const CLINICAL_WEIGHT = 0.35, MIRNA_WEIGHT = 0.65;
+
+const RISK_CARD_DEFS = [
+  { id: "risk_fatty_liver", mirKey: "miR_122", icon: "liver", color: C.amber,
+    riskTitle: "Lipid Metabolism & Fatty Liver Risk",
+    clinical: { key: "triglycerides", riskDirection: "up", threshold: 200, label: "Triglycerides ≥ 200 mg/dL" },
+    description: "Your biomolecular profile shows elevation in miR-122, indicating early-stage disruptions in lipid metabolism and an increased clinical risk for non-alcoholic fatty liver development." },
+  { id: "risk_cholesterol", mirKey: "miR_33", icon: "drop", color: C.accent,
+    riskTitle: "Cholesterol & HDL Dysregulation Risk",
+    clinical: { key: "hdl_cholesterol", riskDirection: "down", threshold: 45, label: "HDL < 45 mg/dL" },
+    description: "A significant drop in miR-33 levels (specifically below 0.9) points toward an active risk of lipid imbalance, marked by lower protective HDL levels and dysregulated cholesterol homeostasis (Source: PMC8492848)." },
+  { id: "risk_inflammation", mirKey: "miR_21", icon: "flame", color: C.red,
+    riskTitle: "Chronic Low-Grade Inflammation Risk",
+    clinical: { key: "crp", riskDirection: "up", threshold: 3.0, label: "CRP ≥ 3.0 mg/L" },
+    description: "Elevated levels of miR-21 are key cellular indicators of chronic, hidden metabolic inflammation. This underlying cellular stress can progressively damage vascular walls and accelerate metabolic deterioration." },
+  { id: "risk_insulin_resistance", mirKey: "miR_103", icon: "stethoscope", color: C.teal,
+    riskTitle: "Insulin Resistance & Glucose Intolerance Risk",
+    clinical: { key: "hba1c", riskDirection: "up", threshold: 6.5, label: "HbA1c ≥ 6.5%" },
+    description: "An increase in miR-103 directly reflects cellular insulin resistance and impaired glucose management. This metabolic shift increases the long-term risk of transitioning into pre-diabetes or Type 2 Diabetes." },
+  { id: "risk_obesity_stress", mirKey: "miR_34a", icon: "scale", color: C.purple,
+    riskTitle: "Severe Obesity & Metabolic Stress Risk",
+    clinical: { key: "bmi", riskDirection: "up", threshold: 30, label: "BMI ≥ 30" },
+    description: "Your results show an elevation in miR-34a, which represents the strongest metabolic stress signal. This indicator is strongly linked to progressive adipose (fat) tissue dysfunction and systemic metabolic suppression." },
 ];
 
+const RISK_CARDS = RISK_CARD_DEFS.map(c => {
+  const t = THERAPEUTIC_MAP[c.mirKey];
+  const isUp = t.riskDirection === "up";
+  return {
+    ...c,
+    subTitle: t.pathway,
+    mirna: { key: c.mirKey, riskDirection: t.riskDirection, threshold: t.threshold,
+             label: `${t.name} (${isUp ? "Elevated" : "Decreased"} — ${isUp ? ">" : "<"} ${t.threshold})` },
+  };
+});
+
 // Pure, typed predicate — no eval() of condition strings.
-function riskCardTriggered(card, values) {
-  return card.rules.some(r => {
-    const v = values[r.key];
-    if (v == null || isNaN(v)) return false;
-    return r.riskDirection === "up" ? v > r.threshold : v < r.threshold;
-  });
+function evalRule(rule, values) {
+  const v = values[rule.key];
+  if (v == null || isNaN(v)) return false;
+  return rule.riskDirection === "up" ? v > rule.threshold : v < rule.threshold;
+}
+
+// Combined risk score: 0, 35, 65 or 100 — mirrors the Ensemble model's
+// 35/65 weighting instead of a plain OR/AND boolean.
+function riskCardScore(card, values) {
+  const clinicalHit = evalRule(card.clinical, values);
+  const mirnaHit = evalRule(card.mirna, values);
+  return (clinicalHit ? CLINICAL_WEIGHT : 0) + (mirnaHit ? MIRNA_WEIGHT : 0);
 }
 
 const ALL_FIELDS = [...CLINICAL_FIELDS, ...MIRNA_FIELDS];
@@ -366,37 +377,69 @@ function ShapBar({value,max}){
 
 // ── RiskIndicatorsPanel ───────────────────────────────────────────────────────
 function RiskIndicatorsPanel({ values }) {
-  const triggered = RISK_CARDS.filter(c => riskCardTriggered(c, values));
-  if (!triggered.length) return null;
+  const scored = RISK_CARDS
+    .map(c => ({
+      ...c,
+      score: riskCardScore(c, values),
+      clinicalHit: evalRule(c.clinical, values),
+      mirnaHit: evalRule(c.mirna, values),
+    }))
+    .filter(c => c.score > 0);
+
+  if (!scored.length) return null;
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 10 }}>
-        ⚠ Risk Indicators Detected ({triggered.length})
+      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 10 }}>
+        <Icon name="warning" color={C.amber} size={16} />
+        Risk Indicators Detected ({scored.length})
       </div>
-      {triggered.map(c => (
-        <div key={c.id} style={{
-          background: C.card, border: `1px solid ${C.amber}40`,
-          borderRadius: 12, padding: "14px 18px", marginBottom: 10,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: 20 }}>{c.icon}</span>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14, color: C.text }}>{c.riskTitle}</div>
-              <div style={{ fontSize: 11, color: C.muted }}>{c.subTitle}</div>
+      {scored.map(c => {
+        const pct = Math.round(c.score * 100);
+        const scoreColor = pct >= 100 ? C.red : C.amber;
+        return (
+          <div key={c.id} style={{
+            background: C.card, border: `1px solid ${scoreColor}40`,
+            borderRadius: 12, padding: "14px 18px", marginBottom: 10,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <Icon name={c.icon} color={c.color} size={22} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: C.text }}>{c.riskTitle}</div>
+                <div style={{ fontSize: 11, color: C.muted }}>{c.subTitle}</div>
+              </div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: scoreColor }}>{pct}%</div>
+                <div style={{ fontSize: 9, color: C.muted }}>combined risk</div>
+              </div>
             </div>
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-            {c.associatedMiRNA.map(m => (
-              <span key={m} style={{
-                fontSize: 10, color: C.amber, background: C.amberSoft,
+
+            {/* Weighted contribution bar — mirrors the Ensemble model's bar */}
+            <div style={{ height: 6, background: C.border, borderRadius: 3, overflow: "hidden", marginBottom: 8, display: "flex" }}>
+              <div style={{ width: `${c.clinicalHit ? CLINICAL_WEIGHT * 100 : 0}%`, background: C.accent }} />
+              <div style={{ width: `${c.mirnaHit ? MIRNA_WEIGHT * 100 : 0}%`, background: c.color }} />
+            </div>
+
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+              <span style={{
+                fontSize: 10, fontWeight: c.clinicalHit ? 700 : 400,
+                color: c.clinicalHit ? C.accent : C.muted,
+                background: c.clinicalHit ? C.accentSoft : C.surface,
+                border: `1px solid ${c.clinicalHit ? C.accent : C.border}40`,
                 borderRadius: 5, padding: "2px 8px",
-              }}>{m}</span>
-            ))}
+              }}>{c.clinicalHit ? "✓" : "—"} Clinical (35%): {c.clinical.label}</span>
+              <span style={{
+                fontSize: 10, fontWeight: c.mirnaHit ? 700 : 400,
+                color: c.mirnaHit ? c.color : C.muted,
+                background: c.mirnaHit ? `${c.color}1a` : C.surface,
+                border: `1px solid ${c.mirnaHit ? c.color : C.border}40`,
+                borderRadius: 5, padding: "2px 8px",
+              }}>{c.mirnaHit ? "✓" : "—"} miRNA (65%): {c.mirna.label}</span>
+            </div>
+            <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>{c.description}</div>
           </div>
-          <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>{c.description}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -443,7 +486,7 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
         }}>#{rank}</div>
 
         {/* Icon + name */}
-        <span style={{ fontSize: 22 }}>{data.icon}</span>
+        <Icon name={data.icon} color={isRisk ? dirColor : C.accent} size={22} />
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>{data.name}</span>
@@ -475,13 +518,15 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
 
           {/* Status bar */}
           <div style={{
+            display: "flex", alignItems: "center", gap: 8,
             padding: "8px 12px", borderRadius: 8, marginBottom: 14,
             background: dirBg, border: `1px solid ${dirColor}30`,
             fontSize: 12, color: dirColor, fontWeight: 500,
           }}>
+            {!isRisk && <Icon name="check" color={dirColor} size={14} />}
             {isRisk
-              ? `⚠ This miRNA is in the pathological range and is actively contributing to MetSyn risk.`
-              : `✓ This miRNA is within normal range and is not currently a risk driver.`}
+              ? `This miRNA is in the pathological range and is actively contributing to MetSyn risk.`
+              : `This miRNA is within normal range and is not currently a risk driver.`}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -491,9 +536,9 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
               background: C.surface, borderRadius: 10,
               border: `1px solid ${C.border}`, padding: 14,
             }}>
-              <div style={{ fontSize: 11, color: C.accent, fontWeight: 700,
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.accent, fontWeight: 700,
                             letterSpacing: "0.5px", marginBottom: 10 }}>
-                💊 CONVENTIONAL THERAPY (Available Now)
+                <Icon name="pill" color={C.accent} size={13} /> CONVENTIONAL THERAPY (Available Now)
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
                 {data.conventional.drugs.map((drug, i) => (
@@ -521,9 +566,9 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
               background: C.surface, borderRadius: 10,
               border: `1px solid ${C.purple}40`, padding: 14,
             }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 700,
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.purple, fontWeight: 700,
                             letterSpacing: "0.5px", marginBottom: 10 }}>
-                🧬 TARGETED GENE THERAPY (Research / Trials)
+                <Icon name="helix" color={C.purple} size={13} /> TARGETED GENE THERAPY (Research / Trials)
               </div>
               <div style={{
                 fontSize: 13, fontWeight: 700, color: C.purple, marginBottom: 4,
@@ -541,7 +586,7 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
                 background: C.tealSoft, borderRadius: 6,
                 padding: "6px 10px", lineHeight: 1.5,
               }}>
-                📦 Delivery: {data.targeted.delivery}
+                Delivery: {data.targeted.delivery}
               </div>
               <div style={{ fontSize: 10, color: C.muted, marginTop: 6, fontStyle: "italic" }}>
                 Ref: {data.targeted.ref}
@@ -556,7 +601,7 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
             border: `1px solid ${C.accent}30`,
           }}>
             <span style={{ fontSize: 11, color: C.accent, fontWeight: 700 }}>
-              🔬 Clinical insight:{" "}
+              Clinical insight:{" "}
             </span>
             <span style={{ fontSize: 11, color: C.offwhite || C.text }}>
               {data.clinical_insight}
@@ -577,7 +622,7 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
 function TherapyPage({ result }) {
   if (!result) return (
     <div style={{ textAlign: "center", padding: "60px 20px", color: C.muted }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>💊</div>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Icon name="pill" color={C.muted} size={48} /></div>
       <div style={{ fontSize: 16, marginBottom: 8, color: C.text }}>No prediction yet</div>
       <div style={{ fontSize: 13 }}>Run a prediction first, then come back here to see personalised therapeutic recommendations.</div>
     </div>
@@ -654,7 +699,7 @@ function TherapyPage({ result }) {
           background: C.amberSoft, borderRadius: 7,
           border: `1px solid ${C.amber}30`, fontSize: 11, color: C.amber,
         }}>
-          ⚠ For research and educational use only. All therapeutic information is sourced from
+          For research and educational use only. All therapeutic information is sourced from
           published clinical literature. This is not a prescription or clinical recommendation.
         </div>
       </div>
@@ -679,8 +724,8 @@ function TherapyPage({ result }) {
         background: C.card, border: `1px solid ${C.border}`,
         borderRadius: 12, padding: "16px 20px", marginTop: 4,
       }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 10 }}>
-          📚 About RNA-Targeted Therapies
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 10 }}>
+          <Icon name="book" color={C.text} size={15} /> About RNA-Targeted Therapies
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
           {[
@@ -755,7 +800,7 @@ function ModelResultPanel({result, modelKey, active, onSelect, atp3, atp3Met}){
       <div style={{padding:"12px 16px",display:"flex",alignItems:"center",gap:10,
                    borderBottom:`1px solid ${isActive?`${color}30`:C.border}`,
                    background:`linear-gradient(90deg,${color}18 0%,transparent 100%)`}}>
-        <span style={{fontSize:18}}>{m.icon}</span>
+        <Icon name={m.icon} color={color} size={18} />
         <div style={{flex:1}}>
           <div style={{fontWeight:600,fontSize:13,color:C.text}}>{m.label}</div>
           <div style={{fontSize:11,color:C.muted}}>{m.desc}</div>
@@ -867,9 +912,7 @@ function ModelResultPanel({result, modelKey, active, onSelect, atp3, atp3Met}){
 // ════════════════════════════════════════════════════════════
 export default function App() {
   const init = () => { const f={}; ALL_FIELDS.forEach(x=>{f[x.key]=""}); return f; };
-  const initExtra = () => { const f={}; EXTRA_MIRNA_FIELDS.forEach(x=>{f[x.key]=""}); return f; };
   const [form,    setForm]    = useState(init());
-  const [extraForm, setExtraForm] = useState(initExtra());
   const [errors,  setErrors]  = useState({});
   const [result,  setResult]  = useState(null);
   const [loading, setLoading] = useState(false);
@@ -878,20 +921,18 @@ export default function App() {
   const resultRef = useRef(null);
 
   const change = (key,val) => { setForm(f=>({...f,[key]:val})); setErrors(e=>({...e,[key]:null})); };
-  const changeExtra = (key,val) => { setExtraForm(f=>({...f,[key]:val})); };
 
   const loadDemo = type => {
     const f={}; ALL_FIELDS.forEach(x=>{f[x.key]=type==="high"?x.hi:x.lo});
-    const ef={}; EXTRA_MIRNA_FIELDS.forEach(x=>{ef[x.key]=type==="high"?x.hi:x.lo});
-    setForm(f); setExtraForm(ef); setErrors({});
+    setForm(f); setErrors({});
   };
 
-  // Combined raw miRNA values (ML + informational) used only for risk-card rules
-  const mirnaAllValues = {};
-  [...MIRNA_FIELDS, ...EXTRA_MIRNA_FIELDS].forEach(f => {
-    const src = MIRNA_FIELDS.includes(f) ? form : extraForm;
-    const v = parseFloat(src[f.key]);
-    if (!isNaN(v)) mirnaAllValues[f.key] = v;
+  // Raw form values (clinical + miRNA) used only for risk-card rules —
+  // every rule references a field already collected above, no extra inputs.
+  const riskCardValues = {};
+  ALL_FIELDS.forEach(f => {
+    const v = parseFloat(form[f.key]);
+    if (!isNaN(v)) riskCardValues[f.key] = v;
   });
 
   const validate = () => {
@@ -946,14 +987,14 @@ export default function App() {
           </div>
           <div>
             <div style={{fontWeight:700,fontSize:14}}>MetSyn Predictor</div>
-            <div style={{fontSize:11,color:C.muted}}>3-Model Comparison · Clinical | miRNA | Ensemble | 💊 Therapy Guide</div>
+            <div style={{fontSize:11,color:C.muted}}>3-Model Comparison · Clinical | miRNA | Ensemble | Therapy Guide</div>
           </div>
         </div>
         <div style={{display:"flex",gap:6}}>
           {Object.values(MODELS).map(m=>(
-            <div key={m.key} style={{fontSize:11,color:m.color,background:`${m.color}15`,
+            <div key={m.key} style={{display:"flex",alignItems:"center",gap:5,fontSize:11,color:m.color,background:`${m.color}15`,
                                      border:`1px solid ${m.color}40`,borderRadius:20,
-                                     padding:"3px 10px"}}>{m.icon} {m.label}</div>
+                                     padding:"3px 10px"}}><Icon name={m.icon} color={m.color} size={12} /> {m.label}</div>
           ))}
         </div>
       </div>
@@ -963,7 +1004,7 @@ export default function App() {
         {[
           { key:"form",    label:"Patient Data",            disabled:false },
           { key:"result",  label:"Model Comparison Results", disabled:!result },
-          { key:"therapy", label:"💊 Therapeutic Guide",     disabled:!result, color:C.teal },
+          { key:"therapy", label:"Therapeutic Guide",     disabled:!result, color:C.teal },
         ].map(t=>(
           <button key={t.key} onClick={()=>setTab(t.key)} disabled={t.disabled}
                   style={{background:"transparent",border:"none",padding:"11px 18px",
@@ -985,32 +1026,21 @@ export default function App() {
               <span style={{fontSize:12,color:C.muted}}>Quick fill:</span>
               <button onClick={()=>loadDemo("high")} style={{background:C.redSoft,border:`1px solid ${C.red}40`,color:C.red,borderRadius:7,padding:"5px 12px",fontSize:12,fontWeight:500,cursor:"pointer"}}>High-risk patient</button>
               <button onClick={()=>loadDemo("low")}  style={{background:C.greenSoft,border:`1px solid ${C.green}40`,color:C.green,borderRadius:7,padding:"5px 12px",fontSize:12,fontWeight:500,cursor:"pointer"}}>Healthy patient</button>
-              <button onClick={()=>{setForm(init());setExtraForm(initExtra());setErrors({});setResult(null);}} style={{background:"transparent",border:`1px solid ${C.border}`,color:C.muted,borderRadius:7,padding:"5px 12px",fontSize:12,cursor:"pointer"}}>Clear</button>
+              <button onClick={()=>{setForm(init());setErrors({});setResult(null);}} style={{background:"transparent",border:`1px solid ${C.border}`,color:C.muted,borderRadius:7,padding:"5px 12px",fontSize:12,cursor:"pointer"}}>Clear</button>
             </div>
 
-            <Card title="Clinical Biomarkers" icon="🔬" color={C.accent}>
+            <Card title="Clinical Biomarkers" icon={<Icon name="flask" color={C.accent} />} color={C.accent}>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
                 {CLINICAL_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
               </div>
             </Card>
 
-            <Card title="miRNA Expression (fold-change vs healthy baseline)" icon="🧬" color={C.purple}>
+            <Card title="miRNA Expression (fold-change vs healthy baseline)" icon={<Icon name="helix" color={C.purple} />} color={C.purple}>
               <div style={{marginBottom:10,padding:"8px 12px",background:C.purpleSoft,borderRadius:7,fontSize:11,color:C.purple,border:`1px solid ${C.purple}30`}}>
-                ⚠ <strong>miR-33 is DOWNREGULATED in MetSyn</strong> — a value below 0.9 indicates risk (opposite to the other miRNAs). Source: PMC8492848.
+                <strong>miR-33 is DOWNREGULATED in MetSyn</strong> — a value below 0.9 indicates risk (opposite to the other miRNAs). Source: PMC8492848.
               </div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
                 {MIRNA_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
-              </div>
-            </Card>
-
-            <Card title="Additional miRNA Markers — Informational Only" icon="⚠️" color={C.amber}>
-              <div style={{marginBottom:10,padding:"8px 12px",background:C.amberSoft,borderRadius:7,fontSize:11,color:C.amber,border:`1px solid ${C.amber}30`}}>
-                These markers are <strong>not used by the ML prediction models</strong> — they only drive the Risk
-                Indicator cards on the Results tab. Reference thresholds below are approximate round-number cutoffs,
-                not sourced from a specific study like the 5 markers above.
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
-                {EXTRA_MIRNA_FIELDS.map(f=><Field key={f.key} f={f} value={extraForm[f.key]} onChange={changeExtra} error={null}/>)}
               </div>
             </Card>
 
@@ -1035,7 +1065,7 @@ export default function App() {
             {result._demo&&(
               <div style={{marginBottom:14,padding:"9px 13px",background:C.amberSoft,
                            border:`1px solid ${C.amber}40`,borderRadius:7,color:C.amber,fontSize:12}}>
-                ⚡ Demo mode — API not running. Results computed locally. Start FastAPI at localhost:8000 for real predictions.
+                Demo mode — API not running. Results computed locally. Start FastAPI at localhost:8000 for real predictions.
               </div>
             )}
 
@@ -1063,7 +1093,7 @@ export default function App() {
               </div>
             </div>
 
-            <RiskIndicatorsPanel values={mirnaAllValues} />
+            <RiskIndicatorsPanel values={riskCardValues} />
 
             {/* Hint */}
             <div style={{fontSize:12,color:C.muted,marginBottom:12,padding:"0 2px"}}>
@@ -1101,7 +1131,7 @@ export default function App() {
                         <tr key={key} style={{borderBottom:`1px solid ${C.border}20`,
                                               background:active===key?`${m.color}08`:"transparent"}}>
                           <td style={{padding:"8px 12px"}}>
-                            <span style={{color:m.color,fontWeight:600}}>{m.icon} {m.label}</span>
+                            <span style={{display:"inline-flex",alignItems:"center",gap:6,color:m.color,fontWeight:600}}><Icon name={m.icon} color={m.color} size={14} /> {m.label}</span>
                           </td>
                           <td style={{padding:"8px 12px",color:RISK_COLOR[r.risk_level],fontWeight:500}}>{r.label}</td>
                           <td style={{padding:"8px 12px",fontFamily:"monospace",fontWeight:700,color:RISK_COLOR[r.risk_level]}}>{Math.round(r.probability*100)}%</td>
@@ -1139,7 +1169,7 @@ export default function App() {
             {result?._demo&&(
               <div style={{marginBottom:14,padding:"9px 13px",background:C.amberSoft,
                            border:`1px solid ${C.amber}40`,borderRadius:7,color:C.amber,fontSize:12}}>
-                ⚡ Demo mode — SHAP impact values are approximate. Start FastAPI at localhost:8000 for real predictions.
+                Demo mode — SHAP impact values are approximate. Start FastAPI at localhost:8000 for real predictions.
               </div>
             )}
             <TherapyPage result={result} />
