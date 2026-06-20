@@ -202,24 +202,32 @@ const THERAPEUTIC_MAP = {
 
 
 // ── Risk indicator cards ──────────────────────────────────────────────────────
-// One card per ML miRNA. `rules` are evaluated directly against numeric values
-// (no string eval) and reuse the threshold/direction already defined in
-// THERAPEUTIC_MAP — single source of truth, no duplicated magic numbers.
+// Each card pairs one clinical biomarker with its matching ML miRNA, combined
+// with the SAME 35% clinical / 65% miRNA weighting already used by the
+// Ensemble model (see MODELS.ensemble) — not a plain OR/AND boolean.
+// miRNA threshold/direction is read from THERAPEUTIC_MAP (single source of truth).
+const CLINICAL_WEIGHT = 0.35, MIRNA_WEIGHT = 0.65;
+
 const RISK_CARD_DEFS = [
   { id: "risk_fatty_liver", mirKey: "miR_122", icon: "liver", color: C.amber,
     riskTitle: "Lipid Metabolism & Fatty Liver Risk",
+    clinical: { key: "triglycerides", riskDirection: "up", threshold: 200, label: "Triglycerides ≥ 200 mg/dL" },
     description: "Your biomolecular profile shows elevation in miR-122, indicating early-stage disruptions in lipid metabolism and an increased clinical risk for non-alcoholic fatty liver development." },
   { id: "risk_cholesterol", mirKey: "miR_33", icon: "drop", color: C.accent,
     riskTitle: "Cholesterol & HDL Dysregulation Risk",
+    clinical: { key: "hdl_cholesterol", riskDirection: "down", threshold: 45, label: "HDL < 45 mg/dL" },
     description: "A significant drop in miR-33 levels (specifically below 0.9) points toward an active risk of lipid imbalance, marked by lower protective HDL levels and dysregulated cholesterol homeostasis (Source: PMC8492848)." },
   { id: "risk_inflammation", mirKey: "miR_21", icon: "flame", color: C.red,
     riskTitle: "Chronic Low-Grade Inflammation Risk",
+    clinical: { key: "crp", riskDirection: "up", threshold: 3.0, label: "CRP ≥ 3.0 mg/L" },
     description: "Elevated levels of miR-21 are key cellular indicators of chronic, hidden metabolic inflammation. This underlying cellular stress can progressively damage vascular walls and accelerate metabolic deterioration." },
   { id: "risk_insulin_resistance", mirKey: "miR_103", icon: "stethoscope", color: C.teal,
     riskTitle: "Insulin Resistance & Glucose Intolerance Risk",
+    clinical: { key: "hba1c", riskDirection: "up", threshold: 6.5, label: "HbA1c ≥ 6.5%" },
     description: "An increase in miR-103 directly reflects cellular insulin resistance and impaired glucose management. This metabolic shift increases the long-term risk of transitioning into pre-diabetes or Type 2 Diabetes." },
   { id: "risk_obesity_stress", mirKey: "miR_34a", icon: "scale", color: C.purple,
     riskTitle: "Severe Obesity & Metabolic Stress Risk",
+    clinical: { key: "bmi", riskDirection: "up", threshold: 30, label: "BMI ≥ 30" },
     description: "Your results show an elevation in miR-34a, which represents the strongest metabolic stress signal. This indicator is strongly linked to progressive adipose (fat) tissue dysfunction and systemic metabolic suppression." },
 ];
 
@@ -229,18 +237,24 @@ const RISK_CARDS = RISK_CARD_DEFS.map(c => {
   return {
     ...c,
     subTitle: t.pathway,
-    associatedMarkers: [`${t.name} (${isUp ? "Elevated" : "Decreased"} — ${isUp ? ">" : "<"} ${t.threshold})`],
-    rules: [{ key: c.mirKey, riskDirection: t.riskDirection, threshold: t.threshold }],
+    mirna: { key: c.mirKey, riskDirection: t.riskDirection, threshold: t.threshold,
+             label: `${t.name} (${isUp ? "Elevated" : "Decreased"} — ${isUp ? ">" : "<"} ${t.threshold})` },
   };
 });
 
 // Pure, typed predicate — no eval() of condition strings.
-function riskCardTriggered(card, values) {
-  return card.rules.some(r => {
-    const v = values[r.key];
-    if (v == null || isNaN(v)) return false;
-    return r.riskDirection === "up" ? v > r.threshold : v < r.threshold;
-  });
+function evalRule(rule, values) {
+  const v = values[rule.key];
+  if (v == null || isNaN(v)) return false;
+  return rule.riskDirection === "up" ? v > rule.threshold : v < rule.threshold;
+}
+
+// Combined risk score: 0, 35, 65 or 100 — mirrors the Ensemble model's
+// 35/65 weighting instead of a plain OR/AND boolean.
+function riskCardScore(card, values) {
+  const clinicalHit = evalRule(card.clinical, values);
+  const mirnaHit = evalRule(card.mirna, values);
+  return (clinicalHit ? CLINICAL_WEIGHT : 0) + (mirnaHit ? MIRNA_WEIGHT : 0);
 }
 
 const ALL_FIELDS = [...CLINICAL_FIELDS, ...MIRNA_FIELDS];
@@ -363,38 +377,69 @@ function ShapBar({value,max}){
 
 // ── RiskIndicatorsPanel ───────────────────────────────────────────────────────
 function RiskIndicatorsPanel({ values }) {
-  const triggered = RISK_CARDS.filter(c => riskCardTriggered(c, values));
-  if (!triggered.length) return null;
+  const scored = RISK_CARDS
+    .map(c => ({
+      ...c,
+      score: riskCardScore(c, values),
+      clinicalHit: evalRule(c.clinical, values),
+      mirnaHit: evalRule(c.mirna, values),
+    }))
+    .filter(c => c.score > 0);
+
+  if (!scored.length) return null;
 
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, color: C.text, marginBottom: 10 }}>
         <Icon name="warning" color={C.amber} size={16} />
-        Risk Indicators Detected ({triggered.length})
+        Risk Indicators Detected ({scored.length})
       </div>
-      {triggered.map(c => (
-        <div key={c.id} style={{
-          background: C.card, border: `1px solid ${C.amber}40`,
-          borderRadius: 12, padding: "14px 18px", marginBottom: 10,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <Icon name={c.icon} color={c.color} size={22} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14, color: C.text }}>{c.riskTitle}</div>
-              <div style={{ fontSize: 11, color: C.muted }}>{c.subTitle}</div>
+      {scored.map(c => {
+        const pct = Math.round(c.score * 100);
+        const scoreColor = pct >= 100 ? C.red : C.amber;
+        return (
+          <div key={c.id} style={{
+            background: C.card, border: `1px solid ${scoreColor}40`,
+            borderRadius: 12, padding: "14px 18px", marginBottom: 10,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <Icon name={c.icon} color={c.color} size={22} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: C.text }}>{c.riskTitle}</div>
+                <div style={{ fontSize: 11, color: C.muted }}>{c.subTitle}</div>
+              </div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: scoreColor }}>{pct}%</div>
+                <div style={{ fontSize: 9, color: C.muted }}>combined risk</div>
+              </div>
             </div>
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-            {c.associatedMarkers.map(m => (
-              <span key={m} style={{
-                fontSize: 10, color: C.amber, background: C.amberSoft,
+
+            {/* Weighted contribution bar — mirrors the Ensemble model's bar */}
+            <div style={{ height: 6, background: C.border, borderRadius: 3, overflow: "hidden", marginBottom: 8, display: "flex" }}>
+              <div style={{ width: `${c.clinicalHit ? CLINICAL_WEIGHT * 100 : 0}%`, background: C.accent }} />
+              <div style={{ width: `${c.mirnaHit ? MIRNA_WEIGHT * 100 : 0}%`, background: c.color }} />
+            </div>
+
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+              <span style={{
+                fontSize: 10, fontWeight: c.clinicalHit ? 700 : 400,
+                color: c.clinicalHit ? C.accent : C.muted,
+                background: c.clinicalHit ? C.accentSoft : C.surface,
+                border: `1px solid ${c.clinicalHit ? C.accent : C.border}40`,
                 borderRadius: 5, padding: "2px 8px",
-              }}>{m}</span>
-            ))}
+              }}>{c.clinicalHit ? "✓" : "—"} Clinical (35%): {c.clinical.label}</span>
+              <span style={{
+                fontSize: 10, fontWeight: c.mirnaHit ? 700 : 400,
+                color: c.mirnaHit ? c.color : C.muted,
+                background: c.mirnaHit ? `${c.color}1a` : C.surface,
+                border: `1px solid ${c.mirnaHit ? c.color : C.border}40`,
+                borderRadius: 5, padding: "2px 8px",
+              }}>{c.mirnaHit ? "✓" : "—"} miRNA (65%): {c.mirna.label}</span>
+            </div>
+            <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>{c.description}</div>
           </div>
-          <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>{c.description}</div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
