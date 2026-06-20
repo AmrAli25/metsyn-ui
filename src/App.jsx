@@ -202,59 +202,37 @@ const THERAPEUTIC_MAP = {
 
 
 // ── Risk indicator cards ──────────────────────────────────────────────────────
-// `rules` are evaluated directly against numeric values (no string eval).
-// A card is shown if ANY of its rules is true. Every rule references a field
-// already collected on the Patient Data form (clinical or the 5 ML miRNAs) —
-// no extra inputs needed.
-const RISK_CARDS = [
-  {
-    id: "risk_diabetes", icon: "drop", color: C.accent,
-    riskTitle: "Type 2 Diabetes Risk",
-    subTitle: "Impaired glucose regulation and insulin secretion",
-    associatedMarkers: ["HbA1c ≥ 6.5%", "Fasting Glucose ≥ 126 mg/dL", "miR-103 (Elevated)"],
-    description: "Your lab values point toward a decrease in body cell sensitivity to insulin. This increases the potential risk of developing Type 2 Diabetes in the future if healthy lifestyle interventions are not implemented.",
-    rules: [
-      {key:"hba1c",           riskDirection:"up", threshold:6.5},
-      {key:"fasting_glucose", riskDirection:"up", threshold:126},
-      {key:"miR_103",         riskDirection:"up", threshold:1.4},
-    ],
-  },
-  {
-    id: "risk_cardiovascular", icon: "heart", color: C.red,
-    riskTitle: "Cardiovascular Risks",
-    subTitle: "Arterial stress and endothelial dysfunction",
-    associatedMarkers: ["LDL ≥ 160 mg/dL", "Systolic BP ≥ 140 mmHg", "HDL < 45 mg/dL"],
-    description: "Your biomolecular profile shows early indicators of increased vascular inflammation and reduced arterial elasticity. This can elevate the long-term risk of atherosclerosis (clogged arteries) or myocardial stress.",
-    rules: [
-      {key:"ldl_cholesterol", riskDirection:"up",   threshold:160},
-      {key:"systolic_bp",     riskDirection:"up",   threshold:140},
-      {key:"hdl_cholesterol", riskDirection:"down", threshold:45},
-    ],
-  },
-  {
-    id: "risk_fatty_liver", icon: "liver", color: C.amber,
-    riskTitle: "Non-Alcoholic Fatty Liver Disease (NAFLD) Risk",
-    subTitle: "Disruption of hepatic lipid metabolism",
-    associatedMarkers: ["miR-122 (Elevated)", "miR-34a (Elevated)", "Triglycerides ≥ 200 mg/dL"],
-    description: "Genetic and lipid signals point toward the initiation of excess lipid accumulation around liver cells. Without early management, this disruption could lead to chronic liver inflammation and impaired hepatic functions.",
-    rules: [
-      {key:"miR_122",       riskDirection:"up", threshold:1.5},
-      {key:"miR_34a",       riskDirection:"up", threshold:1.5},
-      {key:"triglycerides", riskDirection:"up", threshold:200},
-    ],
-  },
-  {
-    id: "risk_inflammation", icon: "flame", color: C.red,
-    riskTitle: "Chronic Inflammation & Metabolic Suppression",
-    subTitle: "Systemic inflammation and leptin resistance",
-    associatedMarkers: ["CRP ≥ 3.0 mg/L", "miR-21 (Elevated)"],
-    description: "Imbalances in these markers trigger a state of low-grade, hidden inflammation. This underlying inflammation suppresses healthy metabolic rate and increases fat-retention signals.",
-    rules: [
-      {key:"crp",    riskDirection:"up", threshold:3.0},
-      {key:"miR_21", riskDirection:"up", threshold:1.5},
-    ],
-  },
+// One card per ML miRNA. `rules` are evaluated directly against numeric values
+// (no string eval) and reuse the threshold/direction already defined in
+// THERAPEUTIC_MAP — single source of truth, no duplicated magic numbers.
+const RISK_CARD_DEFS = [
+  { id: "risk_fatty_liver", mirKey: "miR_122", icon: "liver", color: C.amber,
+    riskTitle: "Lipid Metabolism & Fatty Liver Risk",
+    description: "Your biomolecular profile shows elevation in miR-122, indicating early-stage disruptions in lipid metabolism and an increased clinical risk for non-alcoholic fatty liver development." },
+  { id: "risk_cholesterol", mirKey: "miR_33", icon: "drop", color: C.accent,
+    riskTitle: "Cholesterol & HDL Dysregulation Risk",
+    description: "A significant drop in miR-33 levels (specifically below 0.9) points toward an active risk of lipid imbalance, marked by lower protective HDL levels and dysregulated cholesterol homeostasis (Source: PMC8492848)." },
+  { id: "risk_inflammation", mirKey: "miR_21", icon: "flame", color: C.red,
+    riskTitle: "Chronic Low-Grade Inflammation Risk",
+    description: "Elevated levels of miR-21 are key cellular indicators of chronic, hidden metabolic inflammation. This underlying cellular stress can progressively damage vascular walls and accelerate metabolic deterioration." },
+  { id: "risk_insulin_resistance", mirKey: "miR_103", icon: "stethoscope", color: C.teal,
+    riskTitle: "Insulin Resistance & Glucose Intolerance Risk",
+    description: "An increase in miR-103 directly reflects cellular insulin resistance and impaired glucose management. This metabolic shift increases the long-term risk of transitioning into pre-diabetes or Type 2 Diabetes." },
+  { id: "risk_obesity_stress", mirKey: "miR_34a", icon: "scale", color: C.purple,
+    riskTitle: "Severe Obesity & Metabolic Stress Risk",
+    description: "Your results show an elevation in miR-34a, which represents the strongest metabolic stress signal. This indicator is strongly linked to progressive adipose (fat) tissue dysfunction and systemic metabolic suppression." },
 ];
+
+const RISK_CARDS = RISK_CARD_DEFS.map(c => {
+  const t = THERAPEUTIC_MAP[c.mirKey];
+  const isUp = t.riskDirection === "up";
+  return {
+    ...c,
+    subTitle: t.pathway,
+    associatedMarkers: [`${t.name} (${isUp ? "Elevated" : "Decreased"} — ${isUp ? ">" : "<"} ${t.threshold})`],
+    rules: [{ key: c.mirKey, riskDirection: t.riskDirection, threshold: t.threshold }],
+  };
+});
 
 // Pure, typed predicate — no eval() of condition strings.
 function riskCardTriggered(card, values) {
