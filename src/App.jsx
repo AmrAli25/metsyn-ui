@@ -200,20 +200,6 @@ const THERAPEUTIC_MAP = {
 };
 
 
-// ── Extra miRNA markers (informational only — NOT sent to the ML model) ──────
-// The trained model_mirna.pkl is fixed to the 5 miRNA features above; these
-// are additional markers used only to drive the Risk Indicator cards below.
-// Thresholds here are approximate round-number cutoffs, not sourced from a
-// specific paper like the 5 ML miRNAs — replace with real values if available.
-const EXTRA_MIRNA_FIELDS = [
-  {key:"miR_375",label:"miR-375",sub:"Beta-cell stress (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_143",label:"miR-143",sub:"Insulin sensitivity (informational, ↓ = risk)",min:0.1,max:6,step:0.01,hi:0.5,lo:1.1,riskDirection:"down",threshold:0.7},
-  {key:"miR_126",label:"miR-126",sub:"Endothelial function (informational, ↓ = risk)",min:0.1,max:6,step:0.01,hi:0.5,lo:1.1,riskDirection:"down",threshold:0.7},
-  {key:"miR_1",  label:"miR-1",  sub:"Cardiac stress (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_133",label:"miR-133",sub:"Cardiac muscle stress (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_155",label:"miR-155",sub:"Adipose inflammation (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-  {key:"miR_221",label:"miR-221",sub:"Leptin resistance (informational, ↑ = risk)",min:0.1,max:6,step:0.01,hi:2.0,lo:0.8,riskDirection:"up",threshold:1.5},
-];
 
 // ── Risk indicator cards ──────────────────────────────────────────────────────
 // `rules` are evaluated directly against numeric values (no string eval).
@@ -899,9 +885,7 @@ function ModelResultPanel({result, modelKey, active, onSelect, atp3, atp3Met}){
 // ════════════════════════════════════════════════════════════
 export default function App() {
   const init = () => { const f={}; ALL_FIELDS.forEach(x=>{f[x.key]=""}); return f; };
-  const initExtra = () => { const f={}; EXTRA_MIRNA_FIELDS.forEach(x=>{f[x.key]=""}); return f; };
   const [form,    setForm]    = useState(init());
-  const [extraForm, setExtraForm] = useState(initExtra());
   const [errors,  setErrors]  = useState({});
   const [result,  setResult]  = useState(null);
   const [loading, setLoading] = useState(false);
@@ -910,19 +894,16 @@ export default function App() {
   const resultRef = useRef(null);
 
   const change = (key,val) => { setForm(f=>({...f,[key]:val})); setErrors(e=>({...e,[key]:null})); };
-  const changeExtra = (key,val) => { setExtraForm(f=>({...f,[key]:val})); };
 
   const loadDemo = type => {
     const f={}; ALL_FIELDS.forEach(x=>{f[x.key]=type==="high"?x.hi:x.lo});
-    const ef={}; EXTRA_MIRNA_FIELDS.forEach(x=>{ef[x.key]=type==="high"?x.hi:x.lo});
-    setForm(f); setExtraForm(ef); setErrors({});
+    setForm(f); setErrors({});
   };
 
-  // Combined raw miRNA values (ML + informational) used only for risk-card rules
+  // Raw miRNA values (the 5 ML markers) used only for risk-card rules
   const mirnaAllValues = {};
-  [...MIRNA_FIELDS, ...EXTRA_MIRNA_FIELDS].forEach(f => {
-    const src = MIRNA_FIELDS.includes(f) ? form : extraForm;
-    const v = parseFloat(src[f.key]);
+  MIRNA_FIELDS.forEach(f => {
+    const v = parseFloat(form[f.key]);
     if (!isNaN(v)) mirnaAllValues[f.key] = v;
   });
 
@@ -1017,7 +998,7 @@ export default function App() {
               <span style={{fontSize:12,color:C.muted}}>Quick fill:</span>
               <button onClick={()=>loadDemo("high")} style={{background:C.redSoft,border:`1px solid ${C.red}40`,color:C.red,borderRadius:7,padding:"5px 12px",fontSize:12,fontWeight:500,cursor:"pointer"}}>High-risk patient</button>
               <button onClick={()=>loadDemo("low")}  style={{background:C.greenSoft,border:`1px solid ${C.green}40`,color:C.green,borderRadius:7,padding:"5px 12px",fontSize:12,fontWeight:500,cursor:"pointer"}}>Healthy patient</button>
-              <button onClick={()=>{setForm(init());setExtraForm(initExtra());setErrors({});setResult(null);}} style={{background:"transparent",border:`1px solid ${C.border}`,color:C.muted,borderRadius:7,padding:"5px 12px",fontSize:12,cursor:"pointer"}}>Clear</button>
+              <button onClick={()=>{setForm(init());setErrors({});setResult(null);}} style={{background:"transparent",border:`1px solid ${C.border}`,color:C.muted,borderRadius:7,padding:"5px 12px",fontSize:12,cursor:"pointer"}}>Clear</button>
             </div>
 
             <Card title="Clinical Biomarkers" icon={<Icon name="flask" color={C.accent} />} color={C.accent}>
@@ -1032,17 +1013,6 @@ export default function App() {
               </div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
                 {MIRNA_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
-              </div>
-            </Card>
-
-            <Card title="Additional miRNA Markers — Informational Only" icon={<Icon name="warning" color={C.amber} />} color={C.amber}>
-              <div style={{marginBottom:10,padding:"8px 12px",background:C.amberSoft,borderRadius:7,fontSize:11,color:C.amber,border:`1px solid ${C.amber}30`}}>
-                These markers are <strong>not used by the ML prediction models</strong> — they only drive the Risk
-                Indicator cards on the Results tab. Reference thresholds below are approximate round-number cutoffs,
-                not sourced from a specific study like the 5 markers above.
-              </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
-                {EXTRA_MIRNA_FIELDS.map(f=><Field key={f.key} f={f} value={extraForm[f.key]} onChange={changeExtra} error={null}/>)}
               </div>
             </Card>
 
