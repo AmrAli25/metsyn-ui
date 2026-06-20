@@ -1,0 +1,7 @@
+/* Intentionally empty — all styling is inline in App.jsx */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
