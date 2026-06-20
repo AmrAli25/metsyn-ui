@@ -203,51 +203,55 @@ const THERAPEUTIC_MAP = {
 
 // ── Risk indicator cards ──────────────────────────────────────────────────────
 // `rules` are evaluated directly against numeric values (no string eval).
-// A card is shown if ANY of its rules is true (matches the "or" in the briefs).
+// A card is shown if ANY of its rules is true. Every rule references a field
+// already collected on the Patient Data form (clinical or the 5 ML miRNAs) —
+// no extra inputs needed.
 const RISK_CARDS = [
   {
     id: "risk_diabetes", icon: "drop", color: C.accent,
     riskTitle: "Type 2 Diabetes Risk",
     subTitle: "Impaired glucose regulation and insulin secretion",
-    associatedMiRNA: ["miR-375 (Elevated)", "miR-143 (Decreased)"],
-    description: "Changes in your miRNA levels indicate a decrease in body cell sensitivity to insulin. This increases the potential risk of developing Type 2 Diabetes in the future if healthy lifestyle interventions are not implemented.",
+    associatedMarkers: ["HbA1c ≥ 6.5%", "Fasting Glucose ≥ 126 mg/dL", "miR-103 (Elevated)"],
+    description: "Your lab values point toward a decrease in body cell sensitivity to insulin. This increases the potential risk of developing Type 2 Diabetes in the future if healthy lifestyle interventions are not implemented.",
     rules: [
-      {key:"miR_375", riskDirection:"up",   threshold:1.5},
-      {key:"miR_143", riskDirection:"down", threshold:0.7},
+      {key:"hba1c",           riskDirection:"up", threshold:6.5},
+      {key:"fasting_glucose", riskDirection:"up", threshold:126},
+      {key:"miR_103",         riskDirection:"up", threshold:1.4},
     ],
   },
   {
     id: "risk_cardiovascular", icon: "heart", color: C.red,
     riskTitle: "Cardiovascular Risks",
     subTitle: "Arterial stress and endothelial dysfunction",
-    associatedMiRNA: ["miR-126 (Decreased)", "miR-1 (Elevated)", "miR-133 (Elevated)"],
+    associatedMarkers: ["LDL ≥ 160 mg/dL", "Systolic BP ≥ 140 mmHg", "HDL < 45 mg/dL"],
     description: "Your biomolecular profile shows early indicators of increased vascular inflammation and reduced arterial elasticity. This can elevate the long-term risk of atherosclerosis (clogged arteries) or myocardial stress.",
     rules: [
-      {key:"miR_126", riskDirection:"down", threshold:0.7},
-      {key:"miR_1",   riskDirection:"up",   threshold:1.5},
-      {key:"miR_133", riskDirection:"up",   threshold:1.5},
+      {key:"ldl_cholesterol", riskDirection:"up",   threshold:160},
+      {key:"systolic_bp",     riskDirection:"up",   threshold:140},
+      {key:"hdl_cholesterol", riskDirection:"down", threshold:45},
     ],
   },
   {
     id: "risk_fatty_liver", icon: "liver", color: C.amber,
     riskTitle: "Non-Alcoholic Fatty Liver Disease (NAFLD) Risk",
     subTitle: "Disruption of hepatic lipid metabolism",
-    associatedMiRNA: ["miR-122 (Elevated)", "miR-34a (Elevated)"],
-    description: "Genetic signals point toward the initiation of excess lipid accumulation around liver cells. Without early management, this disruption could lead to chronic liver inflammation and impaired hepatic functions.",
+    associatedMarkers: ["miR-122 (Elevated)", "miR-34a (Elevated)", "Triglycerides ≥ 200 mg/dL"],
+    description: "Genetic and lipid signals point toward the initiation of excess lipid accumulation around liver cells. Without early management, this disruption could lead to chronic liver inflammation and impaired hepatic functions.",
     rules: [
-      {key:"miR_122", riskDirection:"up", threshold:1.5},
-      {key:"miR_34a", riskDirection:"up", threshold:1.5},
+      {key:"miR_122",       riskDirection:"up", threshold:1.5},
+      {key:"miR_34a",       riskDirection:"up", threshold:1.5},
+      {key:"triglycerides", riskDirection:"up", threshold:200},
     ],
   },
   {
     id: "risk_inflammation", icon: "flame", color: C.red,
     riskTitle: "Chronic Inflammation & Metabolic Suppression",
-    subTitle: "Adipose tissue inflammation and leptin resistance",
-    associatedMiRNA: ["miR-155 (Elevated)", "miR-221 (Elevated)"],
-    description: "Imbalances in these specific genetic markers trigger a state of low-grade, hidden inflammation within adipose (fat) tissues. This underlying inflammation suppresses healthy metabolic rate and increases fat-retention signals.",
+    subTitle: "Systemic inflammation and leptin resistance",
+    associatedMarkers: ["CRP ≥ 3.0 mg/L", "miR-21 (Elevated)"],
+    description: "Imbalances in these markers trigger a state of low-grade, hidden inflammation. This underlying inflammation suppresses healthy metabolic rate and increases fat-retention signals.",
     rules: [
-      {key:"miR_155", riskDirection:"up", threshold:1.5},
-      {key:"miR_221", riskDirection:"up", threshold:1.5},
+      {key:"crp",    riskDirection:"up", threshold:3.0},
+      {key:"miR_21", riskDirection:"up", threshold:1.5},
     ],
   },
 ];
@@ -403,7 +407,7 @@ function RiskIndicatorsPanel({ values }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-            {c.associatedMiRNA.map(m => (
+            {c.associatedMarkers.map(m => (
               <span key={m} style={{
                 fontSize: 10, color: C.amber, background: C.amberSoft,
                 borderRadius: 5, padding: "2px 8px",
@@ -900,11 +904,12 @@ export default function App() {
     setForm(f); setErrors({});
   };
 
-  // Raw miRNA values (the 5 ML markers) used only for risk-card rules
-  const mirnaAllValues = {};
-  MIRNA_FIELDS.forEach(f => {
+  // Raw form values (clinical + miRNA) used only for risk-card rules —
+  // every rule references a field already collected above, no extra inputs.
+  const riskCardValues = {};
+  ALL_FIELDS.forEach(f => {
     const v = parseFloat(form[f.key]);
-    if (!isNaN(v)) mirnaAllValues[f.key] = v;
+    if (!isNaN(v)) riskCardValues[f.key] = v;
   });
 
   const validate = () => {
@@ -1065,7 +1070,7 @@ export default function App() {
               </div>
             </div>
 
-            <RiskIndicatorsPanel values={mirnaAllValues} />
+            <RiskIndicatorsPanel values={riskCardValues} />
 
             {/* Hint */}
             <div style={{fontSize:12,color:C.muted,marginBottom:12,padding:"0 2px"}}>
