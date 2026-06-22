@@ -928,7 +928,7 @@ function Field({f,value,onChange,error}){
   // label happens to wrap to (e.g. miR-33's longer sub-text vs its siblings).
   const labelMinHeight = f.sub ? 48 : 32;
   return(
-    <div style={{display:"flex",flexDirection:"column",gap:4}}>
+    <div style={{display:"flex",flexDirection:"column",gap:6}}>
       <label style={{fontSize:11,color:C.muted,fontWeight:500,minHeight:labelMinHeight,display:"block"}}>
         {f.label}{f.unit?` (${f.unit})`:""}
         {f.ref&&<span style={{color:C.borderHi,marginLeft:6}}>{f.ref}</span>}
@@ -1206,7 +1206,7 @@ export default function App() {
             </div>
 
             <Card title="Clinical Biomarkers" icon={<Icon name="flask" color={C.accent} />} color={C.accent}>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"24px 16px"}}>
                 {CLINICAL_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
               </div>
             </Card>
@@ -1215,7 +1215,7 @@ export default function App() {
               <div style={{marginBottom:10,padding:"8px 12px",background:C.purpleSoft,borderRadius:7,fontSize:11,color:C.purple,border:`1px solid ${C.purple}30`}}>
                 <strong>miR-33 is DOWNREGULATED in MetSyn</strong> — a value below 0.9 indicates risk (opposite to the other miRNAs). Source: PMC8492848.
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:12}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"24px 16px"}}>
                 {MIRNA_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
               </div>
             </Card>
