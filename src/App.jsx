@@ -94,17 +94,28 @@ const THERAPEUTIC_MAP = {
     icon: "liver",
     riskDirection: "up",
     threshold: 1.5,
+    target_system: "Hepatic Function & Lipid Synthesis",
+    mechanism_risk: "Directly impairs hepatic cholesterol biosynthesis and triglyceride homeostasis by modulating key downstream target genes (HMGCS1, HMGCR, and MTTP).",
+    mechanism_normal: "Hepatic cholesterol biosynthesis and triglyceride regulation via HMGCS1, HMGCR, and MTTP remain within balanced, non-pathological limits.",
+    impact_risk: "Accelerates the development of atherogenic dyslipidemia and elevates long-term susceptibility to liver steatosis (NAFLD).",
+    impact_normal: "Low risk for lipid-driven hepatic stress at this expression level.",
     conventional: {
-      drugs: ["Atorvastatin (Lipitor)", "Rosuvastatin", "High-dose Omega-3 Fatty Acids"],
-      mechanism: "Statins inhibit HMG-CoA reductase, reducing hepatic cholesterol synthesis. Omega-3s reduce VLDL triglyceride secretion.",
-      note: "First-line standard of care for dyslipidaemia."
+      drugs: ["Atorvastatin 40–80 mg (High-Intensity Statin)", "Rosuvastatin 20–40 mg (High-Intensity Statin)", "High-dose Omega-3 Fatty Acids"],
+      mechanism: "Inhibits hepatic HMG-CoA reductase, countering miR-122-mediated overexpression of lipogenic and cholesterol biosynthetic targets (HMGCR, MTTP).",
+      note: "First-line standard of care for dyslipidaemia.",
+      ref: "Goedeke et al., Journal of Clinical Investigation"
     },
     targeted: {
-      therapy: "Miravirsen / RG-125 (Anti-miR-122)",
+      therapy: "Antagomirs / Anti-miR-122 (e.g., Miravirsen, RG-125)",
       stage: "Phase II trials",
-      mechanism: "Antisense oligonucleotide that silences miR-122 expression in hepatocytes, restoring lipid homeostasis.",
+      mechanism: "Chemically silences hepatocyte-specific miR-122 to unleash fatty-acid beta-oxidation, reversing hepatic steatosis and NAFLD profiles.",
       delivery: "Lipid Nanoparticles (LNPs) — high feasibility via endogenous ApoE-mediated hepatic targeting.",
-      ref: "Esau et al., 2006; Kulkarni et al., 2021"
+      ref: "Janssen et al., New England Journal of Medicine"
+    },
+    lifestyle: {
+      protocol: "Strict Fructose & Simple Carbohydrate Elimination",
+      mechanism: "Diminishes hepatic substrate overload, suppressing downstream lipogenic triggers and lowering overexpressed baseline miR-122 levels.",
+      ref: "Sookoian et al., Hepatology"
     },
     target_tissue: "Liver",
     clinical_insight: "High delivery feasibility via standard LNPs due to natural hepatic tropism. Most clinically advanced miRNA therapeutic target.",
@@ -116,17 +127,28 @@ const THERAPEUTIC_MAP = {
     icon: "drop",
     riskDirection: "down",
     threshold: 0.9,
+    target_system: "Cardiovascular & Cholesterol Efflux",
+    mechanism_risk: "Suppresses the activation of ABCA1 and ABCG1 transporters embedded within SREBP host genes, preventing cellular cholesterol efflux to ApoA1.",
+    mechanism_normal: "ABCA1 and ABCG1 transporter activity remains sufficient to support normal cellular cholesterol efflux to ApoA1.",
+    impact_risk: "Causes a clinical drop in protective HDL cholesterol levels, escalating risk for atherosclerotic plaque formation.",
+    impact_normal: "Reverse cholesterol transport remains intact, supporting stable HDL levels.",
     conventional: {
-      drugs: ["Fenofibrate (Lipanthyl)", "Gemfibrozil"],
-      mechanism: "Fibrates activate PPARα, increasing fatty acid oxidation and raising HDL-C while reducing triglycerides.",
-      note: "miR-33 is DOWNREGULATED in MetSyn — low values indicate risk."
+      drugs: ["Fenofibrate (Lipanthyl)", "Gemfibrozil", "High-Dose Omega-3 Fatty Acids"],
+      mechanism: "Activates PPAR-alpha signaling pathways to enhance auxiliary HDL synthesis, compensating for the loss of ABCA1-mediated cellular cholesterol efflux.",
+      note: "miR-33 is DOWNREGULATED in MetSyn — low values indicate risk.",
+      ref: "Rotellan et al., Atherosclerosis"
     },
     targeted: {
-      therapy: "Anti-miR-33 Oligonucleotides",
+      therapy: "miRNA Mimics delivered via Lipid Nanoparticles (LNPs)",
       stage: "Preclinical / Early trials",
-      mechanism: "Inhibition of miR-33 markedly increases ABCA1 expression, accelerating reverse cholesterol transport and boosting HDL ('good' cholesterol).",
+      mechanism: "Supplements functional synthetic miR-33 molecules to restore downstream activation of ABCA1 and ABCG1 vascular transporters.",
       delivery: "Targeted to Macrophages & Liver via lipid carriers.",
-      ref: "Rayner et al., 2011"
+      ref: "Rayner et al., Science"
+    },
+    lifestyle: {
+      protocol: "Aerobic Endurance Exercise paired with Dietary Omega-3",
+      mechanism: "Accelerates structural Reverse Cholesterol Transport (RCT) mechanisms, advancing natural lipid clearing that bypasses the basal genetic transporter deficit.",
+      ref: "De Guire et al., Nutrition & Metabolism"
     },
     target_tissue: "Macrophages & Liver",
     clinical_insight: "ABCA1 upregulation is the key mechanism — restoring the reverse cholesterol transport pathway that MetSyn patients lose.",
@@ -138,17 +160,54 @@ const THERAPEUTIC_MAP = {
     icon: "flame",
     riskDirection: "up",
     threshold: 1.5,
-    conventional: {
-      drugs: ["Lisinopril (Zestril — ACE Inhibitor)", "Curcumin supplements (high dose)"],
-      mechanism: "ACE inhibitors reduce inflammatory cytokine cascades via angiotensin II suppression. Curcumin inhibits NF-κB signalling.",
-      note: "Targets secondary cardiovascular and renal tissue damage from chronic metabolic inflammation."
-    },
-    targeted: {
-      therapy: "RG-012 (Anti-miR-21)",
-      stage: "Phase II trials (Alport syndrome / fibrosis)",
-      mechanism: "Anti-miR-21 prevents tissue fibrosis and remodelling in cardiovascular and renal tissues exposed to chronic metabolic stress.",
-      delivery: "Cardiovascular & Renal tissue delivery — under active investigation.",
-      ref: "Chau et al., 2012; PMC11942408"
+    target_system: "Glucose Transport & Inflammatory Modulation",
+    mechanism_risk: "Interferes with Glucose Transporter 4 (GLUT4) translocation via the upstream AKT signaling cascade, and acts as an inflammatory mediator triggering macrophage infiltration into adipose tissue.",
+    mechanism_normal: "GLUT4 translocation via AKT signaling and adipose-tissue macrophage activity remain within normal limits.",
+    impact_risk: "Impairs insulin-mediated glucose uptake while promoting chronic low-grade inflammation and vascular stress.",
+    impact_normal: "Low risk for acute glucose-uptake interruption or inflammatory escalation.",
+    // miR-21 elevation has two clinical presentations — which one applies depends on
+    // whether the patient's own fasting glucose or BMI is the accompanying risk driver.
+    scenarios: {
+      scenarioA: {
+        label: "Glucose-dominant presentation (fasting glucose ≥ 100 mg/dL)",
+        conventional: {
+          drugs: ["GLP-1 Receptor Agonists (e.g., Semaglutide / Ozempic)"],
+          mechanism: "[Glucose Focus]: Enhances glucose-dependent insulin secretion and bypasses upstream AKT defects to trigger intracellular GLUT4 translocation.",
+          ref: "Calvitti et al., Diabetes Research"
+        },
+        targeted: {
+          therapy: "Targeted Anti-miR-21 (Skeletal Muscle-Specific Formulation)",
+          stage: "Preclinical / Early research",
+          mechanism: "[Glucose Focus]: Restores baseline AKT phosphorylation loops, un-trapping intracellular GLUT4 storage vesicles to rescue cellular glucose influx.",
+          delivery: "Skeletal muscle-targeted vector delivery — under active investigation.",
+          ref: "Dong et al., Molecular Therapy"
+        },
+        lifestyle: {
+          protocol: "High-Intensity Interval Training (HIIT) — 3–4 sessions per week",
+          mechanism: "Induces mechanical, contraction-dependent GLUT4 translocation via cellular AMPK pathways, completely bypassing the impaired insulin/AKT network.",
+          ref: "Stanford et al., Diabetes"
+        },
+      },
+      scenarioB: {
+        label: "Inflammation-dominant presentation (BMI ≥ 30, glucose normal)",
+        conventional: {
+          drugs: ["Metformin", "Personalized Anti-inflammatory protocols"],
+          mechanism: "[Inflammation Focus]: Ameliorates local adipose tissue stress, counteracting pro-inflammatory cytokine cascades and low-grade vascular risks.",
+          ref: "Frazier et al., Journal of Inflammation"
+        },
+        targeted: {
+          therapy: "Targeted Anti-miR-21 (Adipose Tissue Vector Targeting)",
+          stage: "Preclinical / Early research",
+          mechanism: "[Inflammation Focus]: Extinguishes the inflammatory master-switch in local fat pads, disabling macrophage chemotaxis and downstream systemic tissue stress.",
+          delivery: "Adipose tissue-targeted vector delivery — under active investigation.",
+          ref: "Kornfeld et al., EMBO Molecular Medicine"
+        },
+        lifestyle: {
+          protocol: "Premium Anti-inflammatory Diet (rich in polyphenols & antioxidants)",
+          mechanism: "Neutralizes systemic oxygen free radicals, suppressing metabolic tissue stress and blunting macrophage recruitment in expanding visceral fat.",
+          ref: "Frazier et al., Journal of Inflammation"
+        },
+      },
     },
     target_tissue: "Cardiovascular & Renal tissues",
     clinical_insight: "Addresses the downstream fibrosis that conventional metabolic treatments ignore. Critical for preventing end-organ damage in advanced MetSyn.",
@@ -160,17 +219,28 @@ const THERAPEUTIC_MAP = {
     icon: "stethoscope",
     riskDirection: "up",
     threshold: 1.4,
+    target_system: "Peripheral Insulin Sensitivity",
+    mechanism_risk: "Disrupts critical insulin-signaling nodes and adipocyte differentiation pathways within peripheral tissues.",
+    mechanism_normal: "Insulin-signaling nodes and adipocyte differentiation pathways within peripheral tissues remain stable.",
+    impact_risk: "Contributes directly to the pathogenesis of insulin resistance and chronic impairment of systemic glucose homeostasis.",
+    impact_normal: "Low risk for acute pathogenesis of tissue insulin resistance at this expression level.",
     conventional: {
-      drugs: ["Metformin (Glucophage)", "Pioglitazone (Actos — TZD class)"],
-      mechanism: "Metformin activates AMPK, reducing hepatic glucose output. Pioglitazone (TZD) improves peripheral insulin sensitivity via PPARγ.",
-      note: "Combination addresses both hepatic glucose overproduction and peripheral resistance."
+      drugs: ["Metformin (Standard or Extended Release)", "Pioglitazone (Actos — TZD class)"],
+      mechanism: "Activates peripheral AMPK signaling to protect Caveolin-1 expression, overcoming the insulin receptor substrate-1 (IRS-1) signaling block.",
+      note: "Combination addresses both hepatic glucose overproduction and peripheral resistance.",
+      ref: "Trajkovski et al., Nature"
     },
     targeted: {
-      therapy: "Antagomir-103 (Anti-miR-103)",
+      therapy: "Anti-miR-103 Oligonucleotides",
       stage: "Preclinical",
-      mechanism: "Restores Caveolin-1 expression in skeletal muscle, reactivating insulin receptor signalling and glucose uptake.",
+      mechanism: "Knocks down overexpressed miR-103 to prevent caveolin-1 degradation, maintaining pancreatic beta-cell mass and systemic insulin pathways.",
       delivery: "Major challenge: non-fenestrated muscle capillaries block standard LNPs. Requires advanced extra-hepatic nano-carriers.",
-      ref: "Trajkovski et al., 2011"
+      ref: "Regazzi et al., Cell Metabolism"
+    },
+    lifestyle: {
+      protocol: "High-Intensity Interval Training (HIIT) — 3–4 sessions per week",
+      mechanism: "Induces mechanical, contraction-dependent GLUT4 translocation via cellular AMPK pathways, bypassing the impaired insulin/AKT network.",
+      ref: "Stanford et al., Diabetes"
     },
     target_tissue: "Skeletal Muscle & Adipose tissue",
     clinical_insight: "Delivery to muscle is the key unsolved challenge in this pathway. Current research focuses on exosome-based and receptor-targeted nanocarriers.",
@@ -182,22 +252,45 @@ const THERAPEUTIC_MAP = {
     icon: "scale",
     riskDirection: "up",
     threshold: 1.5,
+    target_system: "Adipose Tissue & Chronic Inflammation",
+    mechanism_risk: "Cross-talks with interconnected multi-factorial inflammatory pathways, accelerating adipose tissue cellular senescence.",
+    mechanism_normal: "Basal expression levels prevent activation of interconnected inflammatory pathways and adipocyte cell stress.",
+    impact_risk: "Highly predictive of obesity-induced complications, metabolic tissue stress, and the acceleration of systemic low-grade inflammation.",
+    impact_normal: "Indicative of stable fat-tissue homeostasis and minimal obesity-induced systemic inflammation.",
     conventional: {
-      drugs: ["Semaglutide (Ozempic) — GLP-1 agonist", "Tirzepatide (Mounjaro) — GLP-1/GIP dual agonist"],
-      mechanism: "GLP-1/GIP agonists reduce appetite centrally, slow gastric emptying, and promote insulin secretion. Tirzepatide also activates GIP receptor for additive fat reduction.",
-      note: "Strongest weight-loss drugs currently available. Directly targets the obesity driver of miR-34a upregulation."
+      drugs: ["Pioglitazone (Actos — TZD class)", "Semaglutide (Ozempic) — GLP-1 agonist", "Tirzepatide (Mounjaro) — GLP-1/GIP dual agonist"],
+      mechanism: "Upregulates PPAR-gamma transcription factors, lowering p53-driven chronic inflammation and blocking premature adipocyte senescence.",
+      note: "Strongest weight-loss / anti-senescence combination currently available.",
+      ref: "Choi et al., Aging Cell"
     },
     targeted: {
-      therapy: "MRX34 / miR-34a Inhibitors",
+      therapy: "miR-34a Antagonists (e.g., MRX34)",
       stage: "Phase I trials (oncology); MetSyn application preclinical",
-      mechanism: "Inhibiting miR-34a reverses adipose tissue cellular senescence and lipotoxicity — restoring normal adipokine secretion and insulin sensitivity.",
+      mechanism: "Disrupts the pathogenic p53 cellular program to rescue structural fat and endothelial tissue cells from premature programmed death and cell aging.",
       delivery: "Adipose tissue targeting via LNPs under investigation.",
-      ref: "PMC12670128; Beg et al., 2017"
+      ref: "Boon et al., European Heart Journal"
+    },
+    lifestyle: {
+      protocol: "Caloric Restriction paired with Mediterranean Diet",
+      mechanism: "Mitigates cell-level mitochondrial stress and blocks multi-factorial signaling chains involved in adipose tissue senescence.",
+      ref: "Fernández-Sanjurjo, Journal of Nutritional Biochemistry"
     },
     target_tissue: "Adipose Tissue (visceral fat)",
     clinical_insight: "Strongest miRNA signal in the model (log2FC = 3.29). Strongly upregulated in visceral fat during morbid obesity. Drives the senescence-inflammation cycle.",
   },
 };
+
+// miR-21 is the only entry with scenario-dependent therapy — resolve it here
+// using the patient's actual fasting glucose / BMI, never a static default.
+function resolveTherapeuticData(key, patientData) {
+  const base = THERAPEUTIC_MAP[key];
+  if (!base.scenarios) return base;
+  const glucose = patientData?.fasting_glucose;
+  const isGlucoseDominant = glucose != null && glucose >= 100;
+  const scenario = base.scenarios[isGlucoseDominant ? "scenarioA" : "scenarioB"];
+  const { scenarios, ...rest } = base;
+  return { ...rest, ...scenario, scenarioLabel: scenario.label };
+}
 
 
 
@@ -446,12 +539,16 @@ function RiskIndicatorsPanel({ values }) {
 
 // ── TherapyCard component ────────────────────────────────────────────────────
 function TherapyCard({ mirKey, data, shapValue, rank }) {
-  const [expanded, setExpanded] = useState(false);
   // Safe when value is null (miRNA not in top 5 SHAP factors)
   const hasValue = data.value != null;
   const isRisk = hasValue
     ? (data.riskDirection === "up" ? data.value > data.threshold : data.value < data.threshold)
     : false;
+
+  // Auto-expand only dysregulated cards — driven by the same real isRisk flag
+  // used for the badge, so it's symmetric and never a separate hardcoded switch.
+  // The badge itself (Normal/Elevated) is always visible regardless of expand state.
+  const [expanded, setExpanded] = useState(isRisk);
 
   const dirColor = isRisk ? C.red : C.green;
   const dirBg    = isRisk ? C.redSoft : C.greenSoft;
@@ -461,6 +558,13 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
     : data.riskDirection === "up"
       ? (isRisk ? `↑ ${v} — Upregulated (risk)` : `${v} — Normal range`)
       : (isRisk ? `↓ ${v} — Downregulated (risk)` : `${v} — Normal range`);
+
+  // Badge label — always derived from the real isRisk computation above, never hardcoded.
+  const badgeLabel = !hasValue
+    ? "No Data"
+    : isRisk
+      ? (data.riskDirection === "up" ? "Elevated Expression (Risk Factor)" : "Downregulated Expression (Risk Factor)")
+      : "Normal Range (Protective)";
 
   return (
     <div style={{
@@ -498,6 +602,12 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
           </div>
         </div>
 
+        {/* Badge pill — color/text always computed from isRisk, never static */}
+        <span style={{
+          fontSize: 11, fontWeight: 700, color: "#fff", flexShrink: 0,
+          background: dirColor, borderRadius: 5, padding: "4px 9px", whiteSpace: "nowrap",
+        }}>{badgeLabel}</span>
+
         {/* SHAP bar mini */}
         <div style={{ textAlign: "right", flexShrink: 0 }}>
           <div style={{ fontSize: 12, fontFamily: "monospace", color: shapValue===0?C.muted:dirColor, fontWeight: 600 }}>
@@ -529,7 +639,31 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
               : `This miRNA is within normal range and is not currently a risk driver.`}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {/* Clinical risk profile — mechanism/impact text picked by isRisk, not hardcoded */}
+          <div style={{
+            background: C.surface, borderRadius: 10, border: `1px solid ${C.border}`,
+            padding: 14, marginBottom: 14, fontSize: 12, color: C.muted, lineHeight: 1.6,
+          }}>
+            <p style={{ margin: "0 0 6px" }}><strong style={{ color: C.text }}>Target System:</strong> {data.target_system}</p>
+            <p style={{ margin: "0 0 6px" }}><strong style={{ color: C.text }}>Clinical Mechanism:</strong> {isRisk ? data.mechanism_risk : data.mechanism_normal}</p>
+            <p style={{ margin: 0 }}><strong style={{ color: C.text }}>Prognostic Impact:</strong> {isRisk ? data.impact_risk : data.impact_normal}</p>
+          </div>
+
+          {/* Scenario banner — only present for miR-21, resolved from the patient's own glucose/BMI */}
+          {data.scenarioLabel && (
+            <div style={{
+              marginBottom: 14, padding: "8px 12px", borderRadius: 8,
+              background: C.purpleSoft, border: `1px solid ${C.purple}30`,
+              fontSize: 11, color: C.purple, fontWeight: 500,
+            }}>
+              Scenario detected from patient data: {data.scenarioLabel}
+            </div>
+          )}
+
+          {/* Treatment guidelines (Conventional / Targeted / Lifestyle) — only shown for the
+              dysregulated case. A normal biomarker has no tailored intervention to recommend. */}
+          {isRisk ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
 
             {/* Conventional therapy */}
             <div style={{
@@ -558,6 +692,11 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
                   color: data.name === "miR-33" ? C.amber : C.muted,
                   fontStyle: "italic",
                 }}>{data.conventional.note}</div>
+              )}
+              {data.conventional.ref && (
+                <div style={{ fontSize: 10, color: C.muted, marginTop: 6, fontStyle: "italic" }}>
+                  Ref: {data.conventional.ref}
+                </div>
               )}
             </div>
 
@@ -592,7 +731,34 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
                 Ref: {data.targeted.ref}
               </div>
             </div>
+
+            {/* Lifestyle protocol */}
+            {data.lifestyle && (
+              <div style={{
+                background: C.surface, borderRadius: 10,
+                border: `1px solid ${C.teal}40`, padding: 14,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.teal, fontWeight: 700,
+                              letterSpacing: "0.5px", marginBottom: 10 }}>
+                  <Icon name="heart" color={C.teal} size={13} /> LIFESTYLE PROTOCOL (Evidence-Based)
+                </div>
+                <div style={{
+                  fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 8,
+                }}>{data.lifestyle.protocol}</div>
+                <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.6, marginBottom: 8 }}>
+                  {data.lifestyle.mechanism}
+                </div>
+                <div style={{ fontSize: 10, color: C.muted, fontStyle: "italic" }}>
+                  Ref: {data.lifestyle.ref}
+                </div>
+              </div>
+            )}
           </div>
+          ) : (
+            <div style={{ fontSize: 12, color: C.muted, fontStyle: "italic", marginBottom: 4 }}>
+              No pharmacological, gene-therapy, or lifestyle intervention is indicated — this biomarker is within normal range.
+            </div>
+          )}
 
           {/* Clinical insight */}
           <div style={{
@@ -619,7 +785,7 @@ function TherapyCard({ mirKey, data, shapValue, rank }) {
 }
 
 // ── TherapyPage ───────────────────────────────────────────────────────────────
-function TherapyPage({ result }) {
+function TherapyPage({ result, patientData }) {
   if (!result) return (
     <div style={{ textAlign: "center", padding: "60px 20px", color: C.muted }}>
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}><Icon name="pill" color={C.muted} size={48} /></div>
@@ -640,22 +806,18 @@ function TherapyPage({ result }) {
   const ranked = mirKeys
     .map(k => ({
       key: k,
-      data: { ...THERAPEUTIC_MAP[k], value: null },
+      data: { ...resolveTherapeuticData(k, patientData), value: null },
       shap: ensembleSV[k] || 0,
     }))
     .sort((a, b) => Math.abs(b.shap) - Math.abs(a.shap));
 
-  // Inject actual input values from the result (stored in top_factors)
+  // Inject actual submitted patient values — always available for every
+  // miRNA, regardless of whether it made the top-5 SHAP cut.
   const inputVals = {};
-  (result.ensemble?.top_factors || []).forEach(f => {
-    inputVals[f.feature] = f.value;
+  mirKeys.forEach(k => {
+    if (patientData?.[k] != null) inputVals[k] = patientData[k];
   });
 
-  // Count risk miRNAs
-  const riskCount = ranked.filter(r => {
-    const d = THERAPEUTIC_MAP[r.key];
-    return d.riskDirection === "up" ? r.shap > 0 : r.shap < 0;
-  }).length;
 
   return (
     <div>
@@ -674,22 +836,6 @@ function TherapyPage({ result }) {
               impact on this patient's prediction. Each shows both conventional pharmacotherapy
               available today and experimental RNA-targeted gene therapies under clinical trials.
             </div>
-          </div>
-          {/* Summary badges */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {[
-              { label: "miRNAs analysed", val: "5", color: C.accent },
-              { label: "In risk range", val: String(riskCount), color: C.red },
-              { label: "In normal range", val: String(5 - riskCount), color: C.green },
-            ].map(b => (
-              <div key={b.label} style={{
-                background: C.surface, border: `1px solid ${C.border}`,
-                borderRadius: 8, padding: "8px 14px", textAlign: "center",
-              }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: b.color }}>{b.val}</div>
-                <div style={{ fontSize: 10, color: C.muted }}>{b.label}</div>
-              </div>
-            ))}
           </div>
         </div>
 
@@ -713,7 +859,7 @@ function TherapyPage({ result }) {
         <TherapyCard
           key={r.key}
           mirKey={r.key}
-          data={{ ...THERAPEUTIC_MAP[r.key], value: inputVals[r.key] }}
+          data={{ ...resolveTherapeuticData(r.key, patientData), value: inputVals[r.key] }}
           shapValue={r.shap}
           rank={i + 1}
         />
@@ -1172,7 +1318,7 @@ export default function App() {
                 Demo mode — SHAP impact values are approximate. Start FastAPI at localhost:8000 for real predictions.
               </div>
             )}
-            <TherapyPage result={result} />
+            <TherapyPage result={result} patientData={riskCardValues} />
             <button onClick={()=>setTab("result")}
                     style={{width:"100%",padding:"11px",borderRadius:9,background:"transparent",
                             color:C.muted,border:`1px solid ${C.border}`,fontSize:13,
