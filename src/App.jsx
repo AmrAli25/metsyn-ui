@@ -923,9 +923,13 @@ function TherapyPage({ result, patientData }) {
 }
 // ── Field ─────────────────────────────────────────────────────────────────────
 function Field({f,value,onChange,error}){
+  // Reserve a fixed label height per field group so every input in the same
+  // grid row starts at the same Y, regardless of how many lines its own
+  // label happens to wrap to (e.g. miR-33's longer sub-text vs its siblings).
+  const labelMinHeight = f.sub ? 48 : 32;
   return(
     <div style={{display:"flex",flexDirection:"column",gap:4}}>
-      <label style={{fontSize:11,color:C.muted,fontWeight:500}}>
+      <label style={{fontSize:11,color:C.muted,fontWeight:500,minHeight:labelMinHeight,display:"block"}}>
         {f.label}{f.unit?` (${f.unit})`:""}
         {f.ref&&<span style={{color:C.borderHi,marginLeft:6}}>{f.ref}</span>}
         {f.sub&&<span style={{display:"block",color:f.key==="miR_33"?C.amber:C.borderHi,marginTop:1}}>{f.sub}</span>}
