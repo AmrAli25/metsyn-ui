@@ -1206,7 +1206,7 @@ export default function App() {
             </div>
 
             <Card title="Clinical Biomarkers" icon={<Icon name="flask" color={C.accent} />} color={C.accent}>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"24px 16px"}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"32px 20px"}}>
                 {CLINICAL_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
               </div>
             </Card>
@@ -1215,7 +1215,7 @@ export default function App() {
               <div style={{marginBottom:10,padding:"8px 12px",background:C.purpleSoft,borderRadius:7,fontSize:11,color:C.purple,border:`1px solid ${C.purple}30`}}>
                 <strong>miR-33 is DOWNREGULATED in MetSyn</strong> — a value below 0.9 indicates risk (opposite to the other miRNAs). Source: PMC8492848.
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"24px 16px"}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:"32px 20px"}}>
                 {MIRNA_FIELDS.map(f=><Field key={f.key} f={f} value={form[f.key]} onChange={change} error={errors[f.key]}/>)}
               </div>
             </Card>
