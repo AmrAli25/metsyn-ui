@@ -373,6 +373,16 @@ const ATP3_LABELS = {
 
 function fmt(k){ return k.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase()); }
 
+// Risk-direction-first comparator for SHAP top-factors lists: every
+// risk-increasing (positive shap_value) factor ranks above every
+// risk-decreasing one, then ties are broken by magnitude — so the #1 slot
+// is always red/risk when any risk factor is present, never a normal one
+// that merely happens to have a larger raw magnitude.
+function byRiskThenMagnitude(a, b) {
+  const riskRank = x => (x.shap_value > 0 ? 0 : 1);
+  return riskRank(a) - riskRank(b) || Math.abs(b.shap_value) - Math.abs(a.shap_value);
+}
+
 // ── Mock prediction (demo mode) ───────────────────────────────────────────────
 function mockAll(form) {
   const score=(form.bmi>=30?1:0)+(form.triglycerides>=150?1:0)+
@@ -393,7 +403,7 @@ function mockAll(form) {
     {feature:"fasting_glucose",value:form.fasting_glucose,shap_value:+((form.fasting_glucose-100)/1500).toFixed(4)},
     {feature:"hdl_cholesterol",value:form.hdl_cholesterol,shap_value:+((45-form.hdl_cholesterol)/600).toFixed(4)},
     {feature:"systolic_bp",value:form.systolic_bp,shap_value:+((form.systolic_bp-130)/1500).toFixed(4)},
-  ].sort((a,b)=>Math.abs(b.shap_value)-Math.abs(a.shap_value)).slice(0,5).map(f=>({...f,direction:dir(f.shap_value)}));
+  ].sort(byRiskThenMagnitude).slice(0,5).map(f=>({...f,direction:dir(f.shap_value)}));
 
   const mirShap = [
     {feature:"miR_34a",value:form.miR_34a,shap_value:+((form.miR_34a-1.5)/25).toFixed(4)},
@@ -401,7 +411,7 @@ function mockAll(form) {
     {feature:"miR_122",value:form.miR_122,shap_value:+((form.miR_122-1.5)/25).toFixed(4)},
     {feature:"miR_33", value:form.miR_33, shap_value:+((0.9-form.miR_33)/25).toFixed(4)},
     {feature:"miR_21", value:form.miR_21, shap_value:+((form.miR_21-1.5)/28).toFixed(4)},
-  ].sort((a,b)=>Math.abs(b.shap_value)-Math.abs(a.shap_value)).slice(0,5).map(f=>({...f,direction:dir(f.shap_value)}));
+  ].sort(byRiskThenMagnitude).slice(0,5).map(f=>({...f,direction:dir(f.shap_value)}));
 
   const mkResult = (prob, top, modelKey) => {
     const pred=prob>=0.5?1:0;
@@ -419,7 +429,7 @@ function mockAll(form) {
   };
 
   const ensTop=[...mirShap,...clinShap.filter(f=>!mirShap.find(m=>m.feature===f.feature))]
-                .sort((a,b)=>Math.abs(b.shap_value)-Math.abs(a.shap_value)).slice(0,5);
+                .sort(byRiskThenMagnitude).slice(0,5);
 
   return {
     _demo:true,
