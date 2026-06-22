@@ -301,27 +301,41 @@ function resolveTherapeuticData(key, patientData) {
 // miRNA threshold/direction is read from THERAPEUTIC_MAP (single source of truth).
 const CLINICAL_WEIGHT = 0.35, MIRNA_WEIGHT = 0.65;
 
+// Each card can fire from its clinical biomarker, its miRNA, or both — the
+// narrative shown must say which one actually triggered, never assume the
+// miRNA is elevated when only the clinical side crossed its threshold (and
+// vice versa).
 const RISK_CARD_DEFS = [
   { id: "risk_fatty_liver", mirKey: "miR_122", icon: "liver", color: C.amber,
     riskTitle: "Lipid Metabolism & Fatty Liver Risk",
     clinical: { key: "triglycerides", riskDirection: "up", threshold: 200, label: "Triglycerides ≥ 200 mg/dL" },
-    description: "Your biomolecular profile shows elevation in miR-122, indicating early-stage disruptions in lipid metabolism and an increased clinical risk for non-alcoholic fatty liver development." },
+    descriptionClinicalOnly: "Your triglycerides are elevated (≥ 200 mg/dL) while miR-122 remains within normal range. This clinical-only signal still indicates early-stage disruption in lipid metabolism and an increased risk for non-alcoholic fatty liver development.",
+    descriptionMirnaOnly: "Your biomolecular profile shows elevation in miR-122 while triglycerides remain within normal range. This molecular-only signal indicates early-stage disruption in lipid metabolism and an increased risk for non-alcoholic fatty liver development.",
+    descriptionBoth: "Both your triglycerides and miR-122 are elevated, indicating an active, multi-signal disruption in lipid metabolism and a clinically significant risk for non-alcoholic fatty liver development." },
   { id: "risk_cholesterol", mirKey: "miR_33", icon: "drop", color: C.accent,
     riskTitle: "Cholesterol & HDL Dysregulation Risk",
     clinical: { key: "hdl_cholesterol", riskDirection: "down", threshold: 45, label: "HDL < 45 mg/dL" },
-    description: "A significant drop in miR-33 levels (specifically below 0.9) points toward an active risk of lipid imbalance, marked by lower protective HDL levels and dysregulated cholesterol homeostasis (Source: PMC8492848)." },
+    descriptionClinicalOnly: "Your HDL cholesterol is low (< 45 mg/dL) while miR-33 remains within normal range. This clinical-only signal still points toward a risk of lipid imbalance and dysregulated cholesterol homeostasis.",
+    descriptionMirnaOnly: "A significant drop in miR-33 levels (below 0.9) points toward an active risk of lipid imbalance, marked by lower protective HDL levels and dysregulated cholesterol homeostasis (Source: PMC8492848), even though your measured HDL is currently within range.",
+    descriptionBoth: "Both your HDL cholesterol and miR-33 indicate risk, marking an active, multi-signal lipid imbalance with dysregulated cholesterol homeostasis (Source: PMC8492848)." },
   { id: "risk_inflammation", mirKey: "miR_21", icon: "flame", color: C.red,
     riskTitle: "Chronic Low-Grade Inflammation Risk",
     clinical: { key: "crp", riskDirection: "up", threshold: 3.0, label: "CRP ≥ 3.0 mg/L" },
-    description: "Elevated levels of miR-21 are key cellular indicators of chronic, hidden metabolic inflammation. This underlying cellular stress can progressively damage vascular walls and accelerate metabolic deterioration." },
+    descriptionClinicalOnly: "Your CRP is elevated (≥ 3.0 mg/L) while miR-21 remains within normal range. This clinical-only signal still indicates chronic low-grade inflammation that can progressively damage vascular walls.",
+    descriptionMirnaOnly: "Elevated levels of miR-21 are a key cellular indicator of chronic, hidden metabolic inflammation, even though your measured CRP is currently within range. This underlying cellular stress can progressively damage vascular walls.",
+    descriptionBoth: "Both your CRP and miR-21 are elevated, confirming active chronic low-grade inflammation that can progressively damage vascular walls and accelerate metabolic deterioration." },
   { id: "risk_insulin_resistance", mirKey: "miR_103", icon: "stethoscope", color: C.teal,
     riskTitle: "Insulin Resistance & Glucose Intolerance Risk",
     clinical: { key: "hba1c", riskDirection: "up", threshold: 6.5, label: "HbA1c ≥ 6.5%" },
-    description: "An increase in miR-103 directly reflects cellular insulin resistance and impaired glucose management. This metabolic shift increases the long-term risk of transitioning into pre-diabetes or Type 2 Diabetes." },
+    descriptionClinicalOnly: "Your HbA1c is elevated (≥ 6.5%) while miR-103 remains within normal range. This clinical-only signal still reflects impaired glucose management and an increased long-term risk of progressing toward Type 2 Diabetes.",
+    descriptionMirnaOnly: "An increase in miR-103 directly reflects cellular insulin resistance, even though your measured HbA1c is currently within range. This molecular-only signal increases the long-term risk of transitioning into pre-diabetes.",
+    descriptionBoth: "Both your HbA1c and miR-103 indicate risk, confirming cellular insulin resistance and impaired glucose management with an elevated risk of progressing into Type 2 Diabetes." },
   { id: "risk_obesity_stress", mirKey: "miR_34a", icon: "scale", color: C.purple,
     riskTitle: "Severe Obesity & Metabolic Stress Risk",
     clinical: { key: "bmi", riskDirection: "up", threshold: 30, label: "BMI ≥ 30" },
-    description: "Your results show an elevation in miR-34a, which represents the strongest metabolic stress signal. This indicator is strongly linked to progressive adipose (fat) tissue dysfunction and systemic metabolic suppression." },
+    descriptionClinicalOnly: "Your BMI is elevated (≥ 30) while miR-34a remains within normal range. This clinical-only signal still indicates adipose tissue stress linked to progressive metabolic dysfunction.",
+    descriptionMirnaOnly: "Your results show an elevation in miR-34a, the strongest metabolic stress signal in this model, even though your measured BMI is currently within range. This molecular-only signal is strongly linked to adipose tissue dysfunction.",
+    descriptionBoth: "Both your BMI and miR-34a indicate risk, confirming progressive adipose tissue dysfunction and systemic metabolic stress at the strongest signal level this model detects." },
 ];
 
 const RISK_CARDS = RISK_CARD_DEFS.map(c => {
@@ -529,7 +543,9 @@ function RiskIndicatorsPanel({ values }) {
                 borderRadius: 5, padding: "2px 8px",
               }}>{c.mirnaHit ? "✓" : "—"} miRNA (65%): {c.mirna.label}</span>
             </div>
-            <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>{c.description}</div>
+            <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6 }}>
+              {c.clinicalHit && c.mirnaHit ? c.descriptionBoth : c.clinicalHit ? c.descriptionClinicalOnly : c.descriptionMirnaOnly}
+            </div>
           </div>
         );
       })}
